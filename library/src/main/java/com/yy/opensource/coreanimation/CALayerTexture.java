@@ -52,4 +52,13 @@ public class CALayerTexture {
         loadTexture(gl);
     }
 
+    float[] scaledVertices(float scaleX, float scaleY) {
+        return new float[] {
+                (float)(-1.0 + scaleX / 2.0), (float)(-1.0 + scaleY / 2.0), 0,
+                (float)(-1.0 + scaleX / 2.0), (float)(1.0 - scaleY / 2.0), 0,
+                (float)(1.0 - scaleX / 2.0), (float)(-1.0 + scaleY / 2.0), 0,
+                (float)(1.0 - scaleX / 2.0), (float)(1.0 - scaleY / 2.0), 0
+        };
+    }
+
 }

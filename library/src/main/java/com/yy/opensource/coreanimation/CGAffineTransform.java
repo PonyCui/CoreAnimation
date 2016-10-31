@@ -40,4 +40,8 @@ public class CGAffineTransform {
         this.ty = values[5];
     }
 
+    public boolean isIdentity() {
+        return this.a == 1.0 && this.b == 0.0 && this.c == 0.0 && this.d == 1.0 && this.tx == 0.0 && this.ty == 0.0;
+    }
+
 }

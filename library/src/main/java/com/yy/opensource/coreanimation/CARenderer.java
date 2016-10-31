@@ -48,7 +48,7 @@ public class CARenderer implements GLSurfaceView.Renderer {
         if (System.currentTimeMillis() < nextTrick) {
             return;
         }
-        nextTrick = System.currentTimeMillis() + (int)((1.0f / (float)surfaceView.FPS) * 1000);
+        nextTrick = System.currentTimeMillis() + (int)((1.0f / (float)surfaceView.FPS) * 1000) - 50;
         gl10.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
         this.surfaceView.layer.draw(gl10);
     }
