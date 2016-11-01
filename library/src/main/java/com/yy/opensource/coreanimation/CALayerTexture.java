@@ -84,16 +84,18 @@ public class CALayerTexture {
         vertices[10] = 1.0f - originY;
     }
 
-    void setTransform(CATransform3D transform, CGRect frame, CGRect windowBounds) {
+    void setTransform(CATransform3D transform, CGPoint anchorPoint, CGRect frame, CGRect windowBounds) {
         CGRect bounds = new CGRect(0, 0, frame.width, frame.height);
-        float ltx = transform.a * bounds.x + transform.c * bounds.y + transform.tx + frame.x;
-        float lty = transform.b * bounds.x + transform.d * bounds.y + transform.ty + frame.y;
-        float rtx = transform.a * (bounds.x + bounds.width) + transform.c * bounds.y + transform.tx + frame.x;
-        float rty = transform.b * (bounds.x + bounds.width) + transform.d * bounds.y + transform.ty + frame.y;
-        float lbx = transform.a * bounds.x + transform.c * (bounds.y + bounds.height) + transform.tx + frame.x;
-        float lby = transform.b * bounds.x + transform.d * (bounds.y + bounds.height) + transform.ty + frame.y;
-        float rbx = transform.a * (bounds.x + bounds.width) + transform.c * (bounds.y + frame.height) + transform.tx + frame.x;
-        float rby = transform.b * (bounds.x + bounds.width) + transform.d * (bounds.y + frame.height) + transform.ty + frame.y;
+        bounds.x = -frame.width * anchorPoint.x;
+        bounds.y = -frame.height * anchorPoint.y;
+        float ltx = transform.a * bounds.x + transform.c * bounds.y + transform.tx + frame.x - bounds.x;
+        float lty = transform.b * bounds.x + transform.d * bounds.y + transform.ty + frame.y - bounds.y;
+        float rtx = transform.a * (bounds.x + bounds.width) + transform.c * bounds.y + transform.tx + frame.x - bounds.x;
+        float rty = transform.b * (bounds.x + bounds.width) + transform.d * bounds.y + transform.ty + frame.y - bounds.y;
+        float lbx = transform.a * bounds.x + transform.c * (bounds.y + bounds.height) + transform.tx + frame.x - bounds.x;
+        float lby = transform.b * bounds.x + transform.d * (bounds.y + bounds.height) + transform.ty + frame.y - bounds.y;
+        float rbx = transform.a * (bounds.x + bounds.width) + transform.c * (bounds.y + frame.height) + transform.tx + frame.x - bounds.x;
+        float rby = transform.b * (bounds.x + bounds.width) + transform.d * (bounds.y + frame.height) + transform.ty + frame.y - bounds.y;
         vertices[3] = -1.0f + (ltx / windowBounds.width * 2);
         vertices[4] = 1.0f - (lty / windowBounds.height * 2);
         vertices[9] = -1.0f + (rtx / windowBounds.width * 2);
@@ -102,39 +104,6 @@ public class CALayerTexture {
         vertices[1] = 1.0f - (lby / windowBounds.height * 2);
         vertices[6] = -1.0f + (rbx / windowBounds.width * 2);
         vertices[7] = 1.0f - (rby / windowBounds.height * 2);
-
-//        float[] originVertices = vertices.clone();
-//        vertices[0] = transform.a * originVertices[0] + (-transform.c) * originVertices[1] + transform.tx / windowBounds.width * 2;
-//        vertices[1] = (-transform.b) * originVertices[0] + transform.d * originVertices[1] - transform.ty / windowBounds.height * 2;
-//        vertices[3] = transform.a * originVertices[3] + (-transform.c) * originVertices[4] + transform.tx / windowBounds.width * 2;
-//        vertices[4] = (-transform.b) * originVertices[3] + transform.d * originVertices[4] - transform.ty / windowBounds.height * 2;
-//        vertices[6] = transform.a * originVertices[6] + (-transform.c) * originVertices[7] + transform.tx / windowBounds.width * 2;
-//        vertices[7] = (-transform.b) * originVertices[6] + transform.d * originVertices[7] - transform.ty / windowBounds.height * 2;
-//        vertices[9] = transform.a * originVertices[9] + (-transform.c) * originVertices[10] + transform.tx / windowBounds.width * 2;
-//        vertices[10] = (-transform.b) * originVertices[9] + transform.d * originVertices[10] - transform.ty / windowBounds.height * 2;
-
-//        // scaleX
-//        vertices[6] = (vertices[6] - vertices[0]) * transform.a + vertices[0];
-//        vertices[9] = (vertices[9] - vertices[3]) * transform.a + vertices[3];
-//        // scaleY
-//        vertices[1] = vertices[4] - (vertices[4] - vertices[1]) * transform.d;
-//        vertices[7] = vertices[10] - (vertices[10] - vertices[7]) * transform.d;
-//        // skewX
-//        vertices[0] += (vertices[9] - vertices[3]) * transform.c;
-//        vertices[6] += (vertices[9] - vertices[3]) * transform.c;
-//        // skewY
-//        vertices[10] -= (vertices[4] - vertices[1]) * transform.b;
-//        vertices[7] -= (vertices[4] - vertices[1]) * transform.b;
-//        // translateX
-//        vertices[0] += transform.tx / windowBounds.width * 2;
-//        vertices[6] += transform.tx / windowBounds.width * 2;
-//        vertices[3] += transform.tx / windowBounds.width * 2;
-//        vertices[9] += transform.tx / windowBounds.width * 2;
-//        // translateY
-//        vertices[1] -= transform.ty / windowBounds.height * 2;
-//        vertices[4] -= transform.ty / windowBounds.height * 2;
-//        vertices[7] -= transform.ty / windowBounds.height * 2;
-//        vertices[10] -= transform.ty / windowBounds.height * 2;
     }
 
 }

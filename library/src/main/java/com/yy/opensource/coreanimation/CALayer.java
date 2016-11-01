@@ -27,6 +27,9 @@ public class CALayer extends CALayerTexture {
     public CATransform3D transform = new CATransform3D();
 
     /**/
+    public CGPoint anchorPoint = new CGPoint(0.5f, 0.5f);
+
+    /**/
     public boolean hidden = false;
 
     /**/
@@ -75,7 +78,7 @@ public class CALayer extends CALayerTexture {
     void draw(GL10 gl) {
         super.draw(gl);
         if (textureLoaded) {
-            if (hidden) {
+            if (hidden || opacity <= 0.0) {
                 return;
             }
             gl.glBindTexture(GL10.GL_TEXTURE_2D, textureIdentifier[0]);
@@ -94,7 +97,7 @@ public class CALayer extends CALayerTexture {
             resetVertices();
             setFrame(combineFrame(), windowBounds);
             if (!combineTransform().isIdentity()) {
-                setTransform(combineTransform(), frame, windowBounds);
+                setTransform(combineTransform(), anchorPoint, frame, windowBounds);
             }
             setVertexBufferNeedsUpdate();
             gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);

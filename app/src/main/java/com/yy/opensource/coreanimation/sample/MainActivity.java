@@ -10,6 +10,7 @@ import android.widget.FrameLayout;
 
 import com.yy.opensource.coreanimation.CALayer;
 import com.yy.opensource.coreanimation.CASurfaceView;
+import com.yy.opensource.coreanimation.CGPoint;
 import com.yy.opensource.coreanimation.CGRect;
 
 import java.util.Timer;
@@ -33,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.test);
         final CALayer testLayer = new CALayer();
         testLayer.setContents(bitmap);
-        testLayer.frame = new CGRect(300,300,150,250);
+        testLayer.frame = new CGRect(100,100,150,250);
 
         Matrix matrix = testLayer.transform.requestMatrix();
 //        matrix.postRotate(i);
@@ -41,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
 //        matrix.postSkew(1.0f, 0.0f);
 //        matrix.postScale(0.5f, 0.5f);
         testLayer.transform.setMatrix(matrix);
-
+//        testLayer.anchorPoint = new CGPoint(0,0);
 
         lll = testLayer;
         sss = surfaceView;
@@ -55,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
         surfaceView.setNeedsDisplay();
 
 
-        tick();
+//        tick();
 
 
         FrameLayout frameLayout = new FrameLayout(this);
@@ -71,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
                 i++;
                 Matrix matrix = lll.transform.requestMatrix();
                 matrix.reset();
-                matrix.postTranslate(-75, -125);
+//                matrix.postTranslate(-75, -125);
                 matrix.postRotate(i);
                 lll.transform.setMatrix(matrix);
                 sss.setNeedsDisplay();
