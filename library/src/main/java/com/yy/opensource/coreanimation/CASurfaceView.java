@@ -32,4 +32,16 @@ public class CASurfaceView extends GLSurfaceView {
         setRenderer(renderer);
     }
 
+    public void enabledAutoRefresh() {
+        setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+    }
+
+    public void disableAutoRefresh() {
+        setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+    }
+
+    public void setNeedsDisplay() {
+        requestRender();
+    }
+
 }

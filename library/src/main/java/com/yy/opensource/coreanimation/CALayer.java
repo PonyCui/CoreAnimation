@@ -2,6 +2,7 @@ package com.yy.opensource.coreanimation;
 
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
+import android.opengl.GLU;
 import android.opengl.GLUtils;
 
 import java.nio.ByteBuffer;
@@ -86,37 +87,20 @@ public class CALayer extends CALayerTexture {
                 gl.glEnable(GL10.GL_DEPTH_TEST);
                 gl.glEnable(GL10.GL_ALPHA_TEST);
                 gl.glAlphaFunc(GL10.GL_GREATER, 0.0f);
-//                GLU.gluOrtho2D(gl, 0.0f, 0.0f, 0.0f, 0.0f);
                 gl.glEnable(GL10.GL_TEXTURE_2D);
             }
             gl.glFrontFace(GL10.GL_CW);
-            FloatBuffer currentVertexBuffer;
-            if (!transform.isIdentity()) {
-                ByteBuffer byteBuffer = ByteBuffer.allocateDirect(vertices.length * 4);
-                byteBuffer.order(ByteOrder.nativeOrder());
-                currentVertexBuffer = byteBuffer.asFloatBuffer();
-                currentVertexBuffer.put(this.scaledVertices(transform.a, transform.d));
-                currentVertexBuffer.position(0);
+
+            resetVertices();
+            setFrame(combineFrame(), windowBounds);
+            if (!combineTransform().isIdentity()) {
+                setTransform(combineTransform(), frame, windowBounds);
             }
-            else {
-                currentVertexBuffer = this.vertexBuffer;
-            }
-            gl.glVertexPointer(3, GL10.GL_FLOAT, 0, currentVertexBuffer);
+            setVertexBufferNeedsUpdate();
+            gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
             gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, textureBuffer);
-            changeViewport(gl);
             gl.glColor4f(1.0f, 1.0f, 1.0f, combineOpacities());
-            if (!transform.isIdentity()) {
-                gl.glPushMatrix();
-                gl.glLoadIdentity();
-                float[] values = transform.request3DMatrix();
-                values[12] = 0.0f;
-                values[13] = 0.0f;
-                gl.glMultMatrixf(values, 0);
-            }
             gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, vertices.length / 3);
-            if (!transform.isIdentity()) {
-                gl.glPopMatrix();
-            }
             gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
             gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
             gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
@@ -138,7 +122,7 @@ public class CALayer extends CALayerTexture {
         return opacity;
     }
 
-    void changeViewport(GL10 gl) {
+    CGRect combineFrame() {
         int superX = 0;
         int superY = 0;
         CALayer currentLayer = superLayer;
@@ -147,34 +131,20 @@ public class CALayer extends CALayerTexture {
             superY += (int)currentLayer.frame.y;
             currentLayer = currentLayer.superLayer;
         }
-        int translateX = 0;
-        int translateY = 0;
-        float transformedWidth = this.frame.width;
-        float transformedHeight = this.frame.height;
-        if (!transform.isIdentity()) {
-            translateX = (int)transform.tx;
-            translateY = (int)transform.ty;
-            float llx = transform.a * frame.x + transform.c * frame.y + transform.tx;
-            float lrx = transform.a * (frame.x + frame.width) + transform.c * frame.y + transform.tx;
-            float lbx = transform.a * frame.x + transform.c * (frame.y + frame.height) + transform.tx;
-            float rbx = transform.a * (frame.x + frame.width) + transform.c * (frame.y + frame.height) + transform.tx;
-            float lly = transform.b * frame.x + transform.d * frame.y + transform.ty;
-            float lry = transform.b * (frame.x + frame.width) + transform.d * frame.y + transform.ty;
-            float lby = transform.b * frame.x + transform.d * (frame.y + frame.height) + transform.ty;
-            float rby = transform.b * (frame.x + frame.width) + transform.d * (frame.y + frame.height) + transform.ty;
-            float minX = Math.min(Math.min(lbx, rbx), Math.min(llx, lrx));
-            float maxX = Math.max(Math.max(lbx, rbx), Math.max(llx, lrx));
-            float minY = Math.min(Math.min(lby, rby), Math.min(lly, lry));
-            float maxY = Math.max(Math.max(lby, rby), Math.max(lly, lry));
-            transformedWidth = maxX - minX;
-            transformedHeight = maxY - minY;
+        return new CGRect(frame.x + superX, frame.y + superY, frame.width, frame.height);
+    }
+
+    CATransform3D combineTransform() {
+        Matrix matrix = transform.requestMatrix();
+        CALayer currentLayer = superLayer;
+        while (null != currentLayer) {
+            Matrix currentMatrix = currentLayer.transform.requestMatrix();
+            matrix.postConcat(currentMatrix);
+            currentLayer = currentLayer.superLayer;
         }
-        gl.glViewport(
-                (int)this.frame.x + superX + translateX,
-                (int)this.windowBounds.height - (int)transformedHeight - (int)this.frame.y - superY - translateY,
-                (int)transformedWidth,
-                (int)transformedHeight
-        );
+        CATransform3D finalTransform = new CATransform3D();
+        finalTransform.setMatrix(matrix);
+        return finalTransform;
     }
 
 }

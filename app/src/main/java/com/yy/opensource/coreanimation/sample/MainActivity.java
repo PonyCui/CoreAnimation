@@ -12,37 +12,71 @@ import com.yy.opensource.coreanimation.CALayer;
 import com.yy.opensource.coreanimation.CASurfaceView;
 import com.yy.opensource.coreanimation.CGRect;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class MainActivity extends AppCompatActivity {
+
+    CALayer lll;
+    CASurfaceView sss;
+    int i = 0;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        CASurfaceView surfaceView = new CASurfaceView(this);
+        final CASurfaceView surfaceView = new CASurfaceView(this);
+        surfaceView.disableAutoRefresh();
         surfaceView.FPS = 60;
         surfaceView.setZOrderOnTop(true);
 
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.test);
-        CALayer testLayer = new CALayer();
+        final CALayer testLayer = new CALayer();
         testLayer.setContents(bitmap);
-        testLayer.frame = new CGRect(0,0,150,150);
+        testLayer.frame = new CGRect(300,300,150,250);
+
         Matrix matrix = testLayer.transform.requestMatrix();
-        matrix.postRotate(20);
+//        matrix.postRotate(i);
+//        matrix.postTranslate(-100,-100);
+//        matrix.postSkew(1.0f, 0.0f);
 //        matrix.postScale(0.5f, 0.5f);
         testLayer.transform.setMatrix(matrix);
+
+
+        lll = testLayer;
+        sss = surfaceView;
         surfaceView.layer.addSublayer(testLayer);
 
-        CALayer testLayer2 = new CALayer();
-        testLayer2.setContents(bitmap);
-        testLayer2.frame = new CGRect(0,400,150,150);
-        Matrix matrix2 = testLayer2.transform.requestMatrix();
-//        matrix.postRotate(45);
-//        matrix.postScale(0.5f, 0.5f);
-        testLayer2.transform.setMatrix(matrix2);
-        surfaceView.layer.addSublayer(testLayer2);
+//        CALayer sLayer = new CALayer();
+//        sLayer.frame = new CGRect(0, 0, 300 / 3, 500 / 3);
+//        sLayer.setContents(bitmap);
+//        testLayer.addSublayer(sLayer);
+
+        surfaceView.setNeedsDisplay();
+
+
+        tick();
+
 
         FrameLayout frameLayout = new FrameLayout(this);
         frameLayout.addView(surfaceView);
         frameLayout.setBackgroundColor(Color.BLACK);
         setContentView(frameLayout);
+    }
+
+    void tick() {
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                i++;
+                Matrix matrix = lll.transform.requestMatrix();
+                matrix.reset();
+                matrix.postTranslate(-75, -125);
+                matrix.postRotate(i);
+                lll.transform.setMatrix(matrix);
+                sss.setNeedsDisplay();
+                tick();
+            }
+        }, 16);
     }
 }

@@ -17,9 +17,9 @@ public class CGAffineTransform {
 
     public float[] request2DMatrix() {
         return new float[] {
-                a,  c,  0,
-                b,  d,  0,
-                tx, ty, 1
+                a,  c,  tx,
+                b,  d,  ty,
+                0,  0,  1
         };
     }
 
