@@ -29,10 +29,10 @@ public class MainActivity extends AppCompatActivity {
 
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.test);
         final CALayer testLayer = new CALayer();
-//        testLayer.setContents(bitmap);
-        testLayer.backgroundColor = new CGColor(1f, 1f, 1f);
+        testLayer.setContents(bitmap);
+        testLayer.backgroundColor = new CGColor(0.5f, 0.5f, 0.5f);
         testLayer.opacity = 1.0f;
-        testLayer.frame = new CGRect(100,100,150,250);
+        testLayer.frame = new CGRect(100,100,150,400);
         surfaceView.layer.addSublayer(testLayer);
 
         CALayer sLayer = new CALayer();
@@ -46,6 +46,8 @@ public class MainActivity extends AppCompatActivity {
         ssLayer.backgroundColor = new CGColor(1f, 1f, 1f);
 //        ssLayer.setContents(bitmap);
         sLayer.addSublayer(ssLayer);
+
+        sLayer.removeFromSuperLayer();
 
 //        testLayer.transform.postScale(0.5f, 0.5f);
 //        testLayer.transform.postScale(1.5f, 1.5f);

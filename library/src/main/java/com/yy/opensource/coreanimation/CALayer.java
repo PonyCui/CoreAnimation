@@ -2,14 +2,7 @@ package com.yy.opensource.coreanimation;
 
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
-import android.opengl.GLU;
 import android.opengl.GLUtils;
-
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
-
-import javax.microedition.khronos.opengles.GL;
 import javax.microedition.khronos.opengles.GL10;
 
 /**
@@ -59,7 +52,11 @@ public class CALayer extends CALayerTexture {
      */
     public CGColor backgroundColor = null;
 
-
+    /**
+     * A string defining how the contents of the layer is mapped into its
+     * bounds rect. Options are `resize', `resizeAspect', `resizeAspectFill'.
+     */
+    public String contentsGravity = "resize";
 
     public void setContents(Bitmap bitmap) {
         this.contents = bitmap;
@@ -144,17 +141,19 @@ public class CALayer extends CALayerTexture {
     protected void draw(GL10 gl) {
         super.draw(gl);
         gl.glFrontFace(GL10.GL_CW);
-        updateVertices();
         drawBackgroundColor(gl);
         if (textureLoaded) {
             if (hidden || opacity <= 0.0) {
                 return;
             }
+            resetVertices();
+            setContentTransform(combineTransform(), anchorPoint, frame, windowBounds);
+            setVertexBufferNeedsUpdate();
             gl.glBindTexture(GL10.GL_TEXTURE_2D, textureIdentifier[0]);
             enableTextureFeatures(gl);
             gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
             gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, textureBuffer);
-            gl.glColor4f(1.0f, 1.0f, 1.0f, combineOpacities());
+            gl.glColor4f(1.0f, 1.0f, 1.0f, combineOpacity());
             gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, vertices.length / 3);
             gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
             enableTextureFeatures(gl);
@@ -166,23 +165,21 @@ public class CALayer extends CALayerTexture {
         }
     }
 
-    private void updateVertices() {
-        resetVertices();
-        setFrame(frame, (superLayer != null ? superLayer.frame : null), windowBounds);
-        if (!combineTransform().isIdentity()) {
-            setTransform(combineTransform(), anchorPoint, frame, windowBounds);
-        }
-        setVertexBufferNeedsUpdate();
+    protected void setContentTransform(CATransform3D transform, CGPoint anchorPoint, CGRect frame, CGRect windowBounds) {
+        setTransform(transform, anchorPoint, frame, windowBounds);
     }
 
     private void drawBackgroundColor(GL10 gl) {
-        if (hidden || combineOpacities() <= 0.0 || backgroundColor == null || backgroundColor.isClearColor()) {
+        if (hidden || combineOpacity() <= 0.0 || backgroundColor == null || backgroundColor.isClearColor()) {
             return;
         }
+        resetVertices();
+        setTransform(combineTransform(), anchorPoint, frame, windowBounds);
+        setVertexBufferNeedsUpdate();
         enableBackgroundFeatures(gl);
         gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
-        if (combineOpacities() < 1.0) {
-            gl.glColorPointer(4, GL10.GL_FLOAT, 0, backgroundColor.colorWithAlpha(combineOpacities()).colorBuffer);
+        if (combineOpacity() < 1.0) {
+            gl.glColorPointer(4, GL10.GL_FLOAT, 0, backgroundColor.colorWithAlpha(combineOpacity()).colorBuffer);
         }
         else {
             gl.glColorPointer(4, GL10.GL_FLOAT, 0, backgroundColor.colorBuffer);
@@ -237,7 +234,7 @@ public class CALayer extends CALayerTexture {
         }
     }
 
-    private float combineOpacities() {
+    private float combineOpacity() {
         float opacity = this.opacity;
         CALayer currentLayer = superLayer;
         while (null != currentLayer) {

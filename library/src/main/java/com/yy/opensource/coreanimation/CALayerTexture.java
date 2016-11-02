@@ -70,37 +70,6 @@ public class CALayerTexture {
         };
     }
 
-    protected void setFrame(CGRect frame, CGRect superFrame, CGRect windowBounds) {
-        if (superFrame != null) {
-            float originX = frame.x / windowBounds.width * 2 + superFrame.x;
-            float sizeX = frame.width / windowBounds.width * 2 + superFrame.x;
-            vertices[0] = -1.0f + originX;
-            vertices[6] = -1.0f + originX + sizeX;
-            vertices[3] = -1.0f + originX;
-            vertices[9] = -1.0f + originX + sizeX;
-            float originY = frame.y / windowBounds.height * 2 + superFrame.y;
-            float sizeY = frame.height / windowBounds.height * 2 + superFrame.y;
-            vertices[1] = 1.0f - originY - sizeY;
-            vertices[4] = 1.0f - originY;
-            vertices[7] = 1.0f - originY - sizeY;
-            vertices[10] = 1.0f - originY;
-        }
-        else {
-            float originX = frame.x / windowBounds.width * 2;
-            float sizeX = frame.width / windowBounds.width * 2;
-            vertices[0] = -1.0f + originX;
-            vertices[6] = -1.0f + originX + sizeX;
-            vertices[3] = -1.0f + originX;
-            vertices[9] = -1.0f + originX + sizeX;
-            float originY = frame.y / windowBounds.height * 2;
-            float sizeY = frame.height / windowBounds.height * 2;
-            vertices[1] = 1.0f - originY - sizeY;
-            vertices[4] = 1.0f - originY;
-            vertices[7] = 1.0f - originY - sizeY;
-            vertices[10] = 1.0f - originY;
-        }
-    }
-
     protected void setTransform(CATransform3D transform, CGPoint anchorPoint, CGRect frame, CGRect windowBounds) {
         CGRect bounds = new CGRect(0, 0, frame.width, frame.height);
         bounds.x = -frame.width * anchorPoint.x;
