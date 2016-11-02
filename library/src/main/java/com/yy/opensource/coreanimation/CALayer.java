@@ -9,6 +9,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
+import javax.microedition.khronos.opengles.GL;
 import javax.microedition.khronos.opengles.GL10;
 
 /**
@@ -37,6 +38,9 @@ public class CALayer extends CALayerTexture {
 
     /**/
     public float opacity = 1.0f;
+
+    /**/
+    public CGColor backgroundColor = new CGColor();
 
     /**/
     private Bitmap contents = null;
@@ -77,25 +81,21 @@ public class CALayer extends CALayerTexture {
     @Override
     void draw(GL10 gl) {
         super.draw(gl);
+        gl.glFrontFace(GL10.GL_CW);
+        updateVertices();
+        drawBackgroundColor(gl);
         if (textureLoaded) {
             if (hidden || opacity <= 0.0) {
                 return;
             }
             gl.glBindTexture(GL10.GL_TEXTURE_2D, textureIdentifier[0]);
-            enabledFeatures(gl);
-            gl.glFrontFace(GL10.GL_CW);
-            resetVertices();
-            setFrame(frame, (superLayer != null ? superLayer.frame : null), windowBounds);
-            if (!combineTransform().isIdentity()) {
-                setTransform(combineTransform(), anchorPoint, frame, windowBounds);
-            }
-            setVertexBufferNeedsUpdate();
+            enableTextureFeatures(gl);
             gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
             gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, textureBuffer);
             gl.glColor4f(1.0f, 1.0f, 1.0f, combineOpacities());
             gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, vertices.length / 3);
             gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-            disableFeatures(gl);
+            enableTextureFeatures(gl);
         }
         for (int i = 0; i < subLayers.length; i++) {
             CALayer layer = subLayers[i];
@@ -104,27 +104,74 @@ public class CALayer extends CALayerTexture {
         }
     }
 
-    private void enabledFeatures(GL10 gl) {
+    void updateVertices() {
+        resetVertices();
+        setFrame(frame, (superLayer != null ? superLayer.frame : null), windowBounds);
+        if (!combineTransform().isIdentity()) {
+            setTransform(combineTransform(), anchorPoint, frame, windowBounds);
+        }
+        setVertexBufferNeedsUpdate();
+    }
+
+    void drawBackgroundColor(GL10 gl) {
+        if (hidden || combineOpacities() <= 0.0 || backgroundColor == null || backgroundColor.isClearColor()) {
+            return;
+        }
+        enableBackgroundFeatures(gl);
+        gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
+        if (combineOpacities() < 1.0) {
+            gl.glColorPointer(4, GL10.GL_FLOAT, 0, backgroundColor.colorWithAlpha(combineOpacities()).colorBuffer);
+        }
+        else {
+            gl.glColorPointer(4, GL10.GL_FLOAT, 0, backgroundColor.colorBuffer);
+        }
+        gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, vertices.length / 3);
+        disableBackgroundFeatures(gl);
+    }
+
+    private void enableBackgroundFeatures(GL10 gl) {
+        gl.glEnableClientState(GL10.GL_COLOR_ARRAY);
         gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
-        gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
         if (!opaque) {
             gl.glEnable(GL10.GL_BLEND);
             gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
             gl.glEnable(GL10.GL_DEPTH_TEST);
             gl.glEnable(GL10.GL_ALPHA_TEST);
             gl.glAlphaFunc(GL10.GL_GREATER, 0.0f);
-            gl.glEnable(GL10.GL_TEXTURE_2D);
         }
     }
 
-    private void disableFeatures(GL10 gl) {
+    private void disableBackgroundFeatures(GL10 gl) {
+        gl.glDisableClientState(GL10.GL_COLOR_ARRAY);
         gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
-        gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
         if (!opaque) {
             gl.glDisable(GL10.GL_BLEND);
             gl.glDisable(GL10.GL_DEPTH_TEST);
             gl.glDisable(GL10.GL_ALPHA_TEST);
-            gl.glDisable(GL10.GL_TEXTURE_2D);
+        }
+    }
+
+    private void enableTextureFeatures(GL10 gl) {
+        gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
+        gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
+        gl.glEnable(GL10.GL_TEXTURE_2D);
+        if (!opaque) {
+            gl.glEnable(GL10.GL_BLEND);
+            gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
+            gl.glEnable(GL10.GL_DEPTH_TEST);
+            gl.glEnable(GL10.GL_ALPHA_TEST);
+            gl.glAlphaFunc(GL10.GL_GREATER, 0.0f);
+        }
+    }
+
+    private void disableTextureFeatures(GL10 gl) {
+        gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
+        gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
+        gl.glDisable(GL10.GL_TEXTURE_2D);
+        if (!opaque) {
+            gl.glDisable(GL10.GL_BLEND);
+            gl.glDisable(GL10.GL_DEPTH_TEST);
+            gl.glDisable(GL10.GL_ALPHA_TEST);
         }
     }
 
@@ -136,18 +183,6 @@ public class CALayer extends CALayerTexture {
             currentLayer = currentLayer.superLayer;
         }
         return opacity;
-    }
-
-    CGRect combineFrame() {
-        int superX = 0;
-        int superY = 0;
-        CALayer currentLayer = superLayer;
-        while (null != currentLayer) {
-            superX += (int)currentLayer.frame.x;
-            superY += (int)currentLayer.frame.y;
-            currentLayer = currentLayer.superLayer;
-        }
-        return new CGRect(frame.x * transform.a + superX, frame.y * transform.d + superY, frame.width, frame.height);
     }
 
     CATransform3D combineTransform() {

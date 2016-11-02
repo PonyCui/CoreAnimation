@@ -10,6 +10,7 @@ import android.widget.FrameLayout;
 
 import com.yy.opensource.coreanimation.CALayer;
 import com.yy.opensource.coreanimation.CASurfaceView;
+import com.yy.opensource.coreanimation.CGColor;
 import com.yy.opensource.coreanimation.CGPoint;
 import com.yy.opensource.coreanimation.CGRect;
 
@@ -28,18 +29,27 @@ public class MainActivity extends AppCompatActivity {
 
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.test);
         final CALayer testLayer = new CALayer();
-        testLayer.setContents(bitmap);
+//        testLayer.setContents(bitmap);
+        testLayer.backgroundColor = new CGColor(1f, 1f, 1f);
+        testLayer.opacity = 1.0f;
         testLayer.frame = new CGRect(100,100,150,250);
         surfaceView.layer.addSublayer(testLayer);
 
         CALayer sLayer = new CALayer();
         sLayer.frame = new CGRect(150, 250, 150, 250);
-        sLayer.setContents(bitmap);
+        sLayer.backgroundColor = new CGColor(1f, 1f, 1f);
+//        sLayer.setContents(bitmap);
         testLayer.addSublayer(sLayer);
+
+        CALayer ssLayer = new CALayer();
+        ssLayer.frame = new CGRect(150, 250, 150, 250);
+        ssLayer.backgroundColor = new CGColor(1f, 1f, 1f);
+//        ssLayer.setContents(bitmap);
+        sLayer.addSublayer(ssLayer);
 
 //        testLayer.transform.postScale(0.5f, 0.5f);
 //        testLayer.transform.postScale(1.5f, 1.5f);
-        testLayer.transform.postSkew(1.0f, 0.0f);
+//        testLayer.transform.postSkew(1.0f, 0.0f);
 //        testLayer.transform.postRotate(45);
 
         surfaceView.setNeedsDisplay();
