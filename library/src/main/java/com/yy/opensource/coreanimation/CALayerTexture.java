@@ -39,13 +39,13 @@ public class CALayerTexture {
         setTextureBufferNeedsUpdate();
     }
 
-    void loadTexture(GL10 gl) {}
+    protected void loadTexture(GL10 gl) {}
 
-    void draw(GL10 gl) {
+    protected void draw(GL10 gl) {
         loadTexture(gl);
     }
 
-    void setVertexBufferNeedsUpdate() {
+    protected void setVertexBufferNeedsUpdate() {
         ByteBuffer byteBuffer = ByteBuffer.allocateDirect(vertices.length * 4);
         byteBuffer.order(ByteOrder.nativeOrder());
         vertexBuffer = byteBuffer.asFloatBuffer();
@@ -53,7 +53,7 @@ public class CALayerTexture {
         vertexBuffer.position(0);
     }
 
-    void setTextureBufferNeedsUpdate() {
+    protected void setTextureBufferNeedsUpdate() {
         ByteBuffer byteBuffer = ByteBuffer.allocateDirect(vertices.length * 4);
         byteBuffer.order(ByteOrder.nativeOrder());
         textureBuffer = byteBuffer.asFloatBuffer();
@@ -61,7 +61,7 @@ public class CALayerTexture {
         textureBuffer.position(0);
     }
 
-    void resetVertices() {
+    protected void resetVertices() {
         vertices = new float[] {
                 -1.0f, -1.0f, 0.0f,
                 -1.0f, 1.0f,  0.0f,
@@ -70,7 +70,7 @@ public class CALayerTexture {
         };
     }
 
-    void setFrame(CGRect frame, CGRect superFrame, CGRect windowBounds) {
+    protected void setFrame(CGRect frame, CGRect superFrame, CGRect windowBounds) {
         if (superFrame != null) {
             float originX = frame.x / windowBounds.width * 2 + superFrame.x;
             float sizeX = frame.width / windowBounds.width * 2 + superFrame.x;
@@ -101,7 +101,7 @@ public class CALayerTexture {
         }
     }
 
-    void setTransform(CATransform3D transform, CGPoint anchorPoint, CGRect frame, CGRect windowBounds) {
+    protected void setTransform(CATransform3D transform, CGPoint anchorPoint, CGRect frame, CGRect windowBounds) {
         CGRect bounds = new CGRect(0, 0, frame.width, frame.height);
         bounds.x = -frame.width * anchorPoint.x;
         bounds.y = -frame.height * anchorPoint.y;

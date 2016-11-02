@@ -18,39 +18,56 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class CALayer extends CALayerTexture {
 
-    /**/
-    public CGRect windowBounds = new CGRect(0,0,0,0);
-
-    /**/
+    /**
+     * Describe a layer's position and size. x and y relate to Left-Top coordinate.
+     */
     public CGRect frame = new CGRect(0,0,0,0);
 
-    /**/
+    /**
+     * Describe layer content's transforming. Base on 3D matrix.
+     * Use it for content scale, skew, rotate, translate.
+     */
     public CATransform3D transform = new CATransform3D();
 
-    /**/
+    /**
+     * Describe the transform anchor point.
+     */
     public CGPoint anchorPoint = new CGPoint(0.5f, 0.5f);
 
-    /**/
+    /**
+     * If true, layer will not be rendered.
+     */
     public boolean hidden = false;
 
-    /**/
+    /**
+     * A hint marking that the layer contents provided by -drawInContext:
+     * is completely opaque. Defaults to NO. Note that this does not affect
+     * the interpretation of the `contents' property directly.
+     */
     public boolean opaque = false;
 
-    /**/
+    /**
+     * The opacity of the layer, as a value between zero and one. Defaults
+     * to one. Specifying a value outside the [0,1] range will give undefined
+     * results.
+     */
     public float opacity = 1.0f;
 
-    /**/
-    public CGColor backgroundColor = new CGColor();
+    /**
+     * The background color of the layer. Default value is nil. Colors
+     * created from tiled patterns are supported.
+     */
+    public CGColor backgroundColor = null;
 
-    /**/
-    private Bitmap contents = null;
 
-    private CALayer superLayer = null;
-    private CALayer[] subLayers = new CALayer[0];
 
     public void setContents(Bitmap bitmap) {
         this.contents = bitmap;
         textureLoaded = false;
+    }
+
+    public CALayer[] getSubLayers() {
+        return subLayers;
     }
 
     public void addSublayer(CALayer layer) {
@@ -63,8 +80,53 @@ public class CALayer extends CALayerTexture {
         layer.superLayer = this;
     }
 
+    public void removeFromSuperLayer() {
+        if (superLayer != null) {
+            CALayer[] newElements = new CALayer[superLayer.subLayers.length - 1];
+            int j = 0;
+            boolean found = false;
+            for (int i = 0; i < superLayer.subLayers.length; i++) {
+                CALayer element = superLayer.subLayers[i];
+                if (element != this) {
+                    newElements[j] = element;
+                    j++;
+                }
+                else {
+                    found = true;
+                }
+            }
+            if (found) {
+                superLayer.subLayers = newElements;
+            }
+        }
+    }
+
+    /**
+     * Private props and methods!!!
+     */
+
+    /**
+     * Describe root window bounds.
+     */
+    protected CGRect windowBounds = new CGRect(0,0,0,0);
+
+    /**
+     * Provide a bitmap, so layer will render this bitmap as content.
+     */
+    private Bitmap contents = null;
+
+    /**
+     * Gets superLayer here.
+     */
+    private CALayer superLayer = null;
+
+    /**
+     * Gets subLayers here.
+     */
+    private CALayer[] subLayers = new CALayer[0];
+
     @Override
-    void loadTexture(GL10 gl) {
+    protected void loadTexture(GL10 gl) {
         if (textureLoaded) {
             return;
         }
@@ -79,7 +141,7 @@ public class CALayer extends CALayerTexture {
     }
 
     @Override
-    void draw(GL10 gl) {
+    protected void draw(GL10 gl) {
         super.draw(gl);
         gl.glFrontFace(GL10.GL_CW);
         updateVertices();
@@ -104,7 +166,7 @@ public class CALayer extends CALayerTexture {
         }
     }
 
-    void updateVertices() {
+    private void updateVertices() {
         resetVertices();
         setFrame(frame, (superLayer != null ? superLayer.frame : null), windowBounds);
         if (!combineTransform().isIdentity()) {
@@ -113,7 +175,7 @@ public class CALayer extends CALayerTexture {
         setVertexBufferNeedsUpdate();
     }
 
-    void drawBackgroundColor(GL10 gl) {
+    private void drawBackgroundColor(GL10 gl) {
         if (hidden || combineOpacities() <= 0.0 || backgroundColor == null || backgroundColor.isClearColor()) {
             return;
         }
@@ -175,7 +237,7 @@ public class CALayer extends CALayerTexture {
         }
     }
 
-    float combineOpacities() {
+    private float combineOpacities() {
         float opacity = this.opacity;
         CALayer currentLayer = superLayer;
         while (null != currentLayer) {
@@ -185,7 +247,7 @@ public class CALayer extends CALayerTexture {
         return opacity;
     }
 
-    CATransform3D combineTransform() {
+    private CATransform3D combineTransform() {
         Matrix matrix = transform.requestMatrix();
         matrix.postTranslate(frame.x, frame.y);
         CALayer currentLayer = superLayer;
