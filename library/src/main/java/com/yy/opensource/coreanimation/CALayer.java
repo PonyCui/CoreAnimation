@@ -82,20 +82,10 @@ public class CALayer extends CALayerTexture {
                 return;
             }
             gl.glBindTexture(GL10.GL_TEXTURE_2D, textureIdentifier[0]);
-            gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
-            gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
-            if (!opaque) {
-                gl.glEnable(GL10.GL_BLEND);
-                gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
-                gl.glEnable(GL10.GL_DEPTH_TEST);
-                gl.glEnable(GL10.GL_ALPHA_TEST);
-                gl.glAlphaFunc(GL10.GL_GREATER, 0.0f);
-                gl.glEnable(GL10.GL_TEXTURE_2D);
-            }
+            enabledFeatures(gl);
             gl.glFrontFace(GL10.GL_CW);
-
             resetVertices();
-            setFrame(combineFrame(), windowBounds);
+            setFrame(frame, (superLayer != null ? superLayer.frame : null), windowBounds);
             if (!combineTransform().isIdentity()) {
                 setTransform(combineTransform(), anchorPoint, frame, windowBounds);
             }
@@ -105,13 +95,36 @@ public class CALayer extends CALayerTexture {
             gl.glColor4f(1.0f, 1.0f, 1.0f, combineOpacities());
             gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, vertices.length / 3);
             gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-            gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
-            gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
+            disableFeatures(gl);
         }
         for (int i = 0; i < subLayers.length; i++) {
             CALayer layer = subLayers[i];
             layer.windowBounds = windowBounds;
             layer.draw(gl);
+        }
+    }
+
+    private void enabledFeatures(GL10 gl) {
+        gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
+        gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
+        if (!opaque) {
+            gl.glEnable(GL10.GL_BLEND);
+            gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
+            gl.glEnable(GL10.GL_DEPTH_TEST);
+            gl.glEnable(GL10.GL_ALPHA_TEST);
+            gl.glAlphaFunc(GL10.GL_GREATER, 0.0f);
+            gl.glEnable(GL10.GL_TEXTURE_2D);
+        }
+    }
+
+    private void disableFeatures(GL10 gl) {
+        gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
+        gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
+        if (!opaque) {
+            gl.glDisable(GL10.GL_BLEND);
+            gl.glDisable(GL10.GL_DEPTH_TEST);
+            gl.glDisable(GL10.GL_ALPHA_TEST);
+            gl.glDisable(GL10.GL_TEXTURE_2D);
         }
     }
 
@@ -134,15 +147,17 @@ public class CALayer extends CALayerTexture {
             superY += (int)currentLayer.frame.y;
             currentLayer = currentLayer.superLayer;
         }
-        return new CGRect(frame.x + superX, frame.y + superY, frame.width, frame.height);
+        return new CGRect(frame.x * transform.a + superX, frame.y * transform.d + superY, frame.width, frame.height);
     }
 
     CATransform3D combineTransform() {
         Matrix matrix = transform.requestMatrix();
+        matrix.postTranslate(frame.x, frame.y);
         CALayer currentLayer = superLayer;
         while (null != currentLayer) {
             Matrix currentMatrix = currentLayer.transform.requestMatrix();
             matrix.postConcat(currentMatrix);
+            matrix.postTranslate(currentLayer.frame.x, currentLayer.frame.y);
             currentLayer = currentLayer.superLayer;
         }
         CATransform3D finalTransform = new CATransform3D();

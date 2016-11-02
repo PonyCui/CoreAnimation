@@ -18,11 +18,6 @@ import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
 
-    CALayer lll;
-    CASurfaceView sss;
-    int i = 0;
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,49 +30,23 @@ public class MainActivity extends AppCompatActivity {
         final CALayer testLayer = new CALayer();
         testLayer.setContents(bitmap);
         testLayer.frame = new CGRect(100,100,150,250);
-
-        Matrix matrix = testLayer.transform.requestMatrix();
-//        matrix.postRotate(i);
-//        matrix.postTranslate(-100,-100);
-//        matrix.postSkew(1.0f, 0.0f);
-//        matrix.postScale(0.5f, 0.5f);
-        testLayer.transform.setMatrix(matrix);
-//        testLayer.anchorPoint = new CGPoint(0,0);
-
-        lll = testLayer;
-        sss = surfaceView;
         surfaceView.layer.addSublayer(testLayer);
 
-//        CALayer sLayer = new CALayer();
-//        sLayer.frame = new CGRect(0, 0, 300 / 3, 500 / 3);
-//        sLayer.setContents(bitmap);
-//        testLayer.addSublayer(sLayer);
+        CALayer sLayer = new CALayer();
+        sLayer.frame = new CGRect(150, 250, 150, 250);
+        sLayer.setContents(bitmap);
+        testLayer.addSublayer(sLayer);
+
+//        testLayer.transform.postScale(0.5f, 0.5f);
+//        testLayer.transform.postScale(1.5f, 1.5f);
+        testLayer.transform.postSkew(1.0f, 0.0f);
+//        testLayer.transform.postRotate(45);
 
         surfaceView.setNeedsDisplay();
-
-
-//        tick();
-
 
         FrameLayout frameLayout = new FrameLayout(this);
         frameLayout.addView(surfaceView);
         frameLayout.setBackgroundColor(Color.BLACK);
         setContentView(frameLayout);
-    }
-
-    void tick() {
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                i++;
-                Matrix matrix = lll.transform.requestMatrix();
-                matrix.reset();
-//                matrix.postTranslate(-75, -125);
-                matrix.postRotate(i);
-                lll.transform.setMatrix(matrix);
-                sss.setNeedsDisplay();
-                tick();
-            }
-        }, 16);
     }
 }

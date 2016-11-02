@@ -69,33 +69,49 @@ public class CALayerTexture {
         };
     }
 
-    void setFrame(CGRect frame, CGRect windowBounds) {
-        float originX = frame.x / windowBounds.width * 2;
-        float sizeX = frame.width / windowBounds.width * 2;
-        vertices[0] = -1.0f + originX;
-        vertices[6] = -1.0f + originX + sizeX;
-        vertices[3] = -1.0f + originX;
-        vertices[9] = -1.0f + originX + sizeX;
-        float originY = frame.y / windowBounds.height * 2;
-        float sizeY = frame.height / windowBounds.height * 2;
-        vertices[1] = 1.0f - originY - sizeY;
-        vertices[4] = 1.0f - originY;
-        vertices[7] = 1.0f - originY - sizeY;
-        vertices[10] = 1.0f - originY;
+    void setFrame(CGRect frame, CGRect superFrame, CGRect windowBounds) {
+        if (superFrame != null) {
+            float originX = frame.x / windowBounds.width * 2 + superFrame.x;
+            float sizeX = frame.width / windowBounds.width * 2 + superFrame.x;
+            vertices[0] = -1.0f + originX;
+            vertices[6] = -1.0f + originX + sizeX;
+            vertices[3] = -1.0f + originX;
+            vertices[9] = -1.0f + originX + sizeX;
+            float originY = frame.y / windowBounds.height * 2 + superFrame.y;
+            float sizeY = frame.height / windowBounds.height * 2 + superFrame.y;
+            vertices[1] = 1.0f - originY - sizeY;
+            vertices[4] = 1.0f - originY;
+            vertices[7] = 1.0f - originY - sizeY;
+            vertices[10] = 1.0f - originY;
+        }
+        else {
+            float originX = frame.x / windowBounds.width * 2;
+            float sizeX = frame.width / windowBounds.width * 2;
+            vertices[0] = -1.0f + originX;
+            vertices[6] = -1.0f + originX + sizeX;
+            vertices[3] = -1.0f + originX;
+            vertices[9] = -1.0f + originX + sizeX;
+            float originY = frame.y / windowBounds.height * 2;
+            float sizeY = frame.height / windowBounds.height * 2;
+            vertices[1] = 1.0f - originY - sizeY;
+            vertices[4] = 1.0f - originY;
+            vertices[7] = 1.0f - originY - sizeY;
+            vertices[10] = 1.0f - originY;
+        }
     }
 
     void setTransform(CATransform3D transform, CGPoint anchorPoint, CGRect frame, CGRect windowBounds) {
         CGRect bounds = new CGRect(0, 0, frame.width, frame.height);
         bounds.x = -frame.width * anchorPoint.x;
         bounds.y = -frame.height * anchorPoint.y;
-        float ltx = transform.a * bounds.x + transform.c * bounds.y + transform.tx + frame.x - bounds.x;
-        float lty = transform.b * bounds.x + transform.d * bounds.y + transform.ty + frame.y - bounds.y;
-        float rtx = transform.a * (bounds.x + bounds.width) + transform.c * bounds.y + transform.tx + frame.x - bounds.x;
-        float rty = transform.b * (bounds.x + bounds.width) + transform.d * bounds.y + transform.ty + frame.y - bounds.y;
-        float lbx = transform.a * bounds.x + transform.c * (bounds.y + bounds.height) + transform.tx + frame.x - bounds.x;
-        float lby = transform.b * bounds.x + transform.d * (bounds.y + bounds.height) + transform.ty + frame.y - bounds.y;
-        float rbx = transform.a * (bounds.x + bounds.width) + transform.c * (bounds.y + frame.height) + transform.tx + frame.x - bounds.x;
-        float rby = transform.b * (bounds.x + bounds.width) + transform.d * (bounds.y + frame.height) + transform.ty + frame.y - bounds.y;
+        float ltx = transform.a * bounds.x + transform.c * bounds.y + transform.tx - bounds.x;
+        float lty = transform.b * bounds.x + transform.d * bounds.y + transform.ty - bounds.y;
+        float rtx = transform.a * (bounds.x + bounds.width) + transform.c * bounds.y + transform.tx - bounds.x;
+        float rty = transform.b * (bounds.x + bounds.width) + transform.d * bounds.y + transform.ty - bounds.y;
+        float lbx = transform.a * bounds.x + transform.c * (bounds.y + bounds.height) + transform.tx - bounds.x;
+        float lby = transform.b * bounds.x + transform.d * (bounds.y + bounds.height) + transform.ty - bounds.y;
+        float rbx = transform.a * (bounds.x + bounds.width) + transform.c * (bounds.y + frame.height) + transform.tx - bounds.x;
+        float rby = transform.b * (bounds.x + bounds.width) + transform.d * (bounds.y + frame.height) + transform.ty - bounds.y;
         vertices[3] = -1.0f + (ltx / windowBounds.width * 2);
         vertices[4] = 1.0f - (lty / windowBounds.height * 2);
         vertices[9] = -1.0f + (rtx / windowBounds.width * 2);
