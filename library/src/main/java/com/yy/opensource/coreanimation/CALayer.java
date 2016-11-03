@@ -60,6 +60,8 @@ public class CALayer extends CALayerTexture {
 
     public void setContents(Bitmap bitmap) {
         this.contents = bitmap;
+        this.contentSize.width = (float)bitmap.getWidth();
+        this.contentSize.height = (float)bitmap.getHeight();
         textureLoaded = false;
     }
 
@@ -105,12 +107,17 @@ public class CALayer extends CALayerTexture {
     /**
      * Describe root window bounds.
      */
-    protected CGRect windowBounds = new CGRect(0,0,0,0);
+    protected CGRect windowBounds = new CGRect(0, 0, 0, 0);
 
     /**
      * Provide a bitmap, so layer will render this bitmap as content.
      */
     private Bitmap contents = null;
+
+    /**
+     * Describe the size of content.
+     */
+    private CGSize contentSize = new CGSize(0, 0);
 
     /**
      * Gets superLayer here.
@@ -166,7 +173,89 @@ public class CALayer extends CALayerTexture {
     }
 
     protected void setContentTransform(CATransform3D transform, CGPoint anchorPoint, CGRect frame, CGRect windowBounds) {
-        setTransform(transform, anchorPoint, frame, windowBounds);
+        if (contentsGravity.equals("resizeAspect")) {
+            CGRect bounds;
+            float moveX = 0, moveY = 0;
+            if (frame.width / frame.height >= contentSize.width / contentSize.height) {
+                // vertical
+                bounds = new CGRect(
+                        0,
+                        0,
+                        contentSize.width / contentSize.height * frame.height,
+                        frame.height);
+                moveX = (float)((frame.width - contentSize.width / contentSize.height * frame.height) / 2.0);
+            }
+            else {
+                // horizon
+                bounds = new CGRect(
+                        0,
+                        0,
+                        frame.width,
+                        contentSize.height / contentSize.width * frame.width);
+                moveY = (float)((frame.height - contentSize.height / contentSize.width * frame.width) / 2.0);
+            }
+            bounds.x = -frame.width * anchorPoint.x;
+            bounds.y = -frame.height * anchorPoint.y;
+            float ltx = transform.a * bounds.x + transform.c * bounds.y + transform.tx - bounds.x + moveX;
+            float lty = transform.b * bounds.x + transform.d * bounds.y + transform.ty - bounds.y + moveY;
+            float rtx = transform.a * (bounds.x + bounds.width) + transform.c * bounds.y + transform.tx - bounds.x + moveX;
+            float rty = transform.b * (bounds.x + bounds.width) + transform.d * bounds.y + transform.ty - bounds.y + moveY;
+            float lbx = transform.a * bounds.x + transform.c * (bounds.y + bounds.height) + transform.tx - bounds.x + moveX;
+            float lby = transform.b * bounds.x + transform.d * (bounds.y + bounds.height) + transform.ty - bounds.y + moveY;
+            float rbx = transform.a * (bounds.x + bounds.width) + transform.c * (bounds.y + bounds.height) + transform.tx - bounds.x + moveX;
+            float rby = transform.b * (bounds.x + bounds.width) + transform.d * (bounds.y + bounds.height) + transform.ty - bounds.y + moveY;
+            vertices[3] = -1.0f + (ltx / windowBounds.width * 2);
+            vertices[4] = 1.0f - (lty / windowBounds.height * 2);
+            vertices[9] = -1.0f + (rtx / windowBounds.width * 2);
+            vertices[10] = 1.0f - (rty / windowBounds.height * 2);
+            vertices[0] = -1.0f + (lbx / windowBounds.width * 2);
+            vertices[1] = 1.0f - (lby / windowBounds.height * 2);
+            vertices[6] = -1.0f + (rbx / windowBounds.width * 2);
+            vertices[7] = 1.0f - (rby / windowBounds.height * 2);
+        }
+        else if (contentsGravity.equals("resizeAspectFill")) {
+            CGRect bounds;
+            float moveX = 0, moveY = 0;
+            if (frame.width / frame.height >= contentSize.width / contentSize.height) {
+                // horizon
+                bounds = new CGRect(
+                        0,
+                        0,
+                        frame.width,
+                        frame.width / (contentSize.width / contentSize.height));
+                moveY = (float)((frame.height - bounds.height) / 2.0);
+            }
+            else {
+                // vertical
+                bounds = new CGRect(
+                        0,
+                        0,
+                        frame.height * (contentSize.width / contentSize.height),
+                        frame.height);
+                moveX = (float)((frame.width - bounds.width) / 2.0);
+            }
+            bounds.x = -frame.width * anchorPoint.x;
+            bounds.y = -frame.height * anchorPoint.y;
+            float ltx = transform.a * bounds.x + transform.c * bounds.y + transform.tx - bounds.x + moveX;
+            float lty = transform.b * bounds.x + transform.d * bounds.y + transform.ty - bounds.y + moveY;
+            float rtx = transform.a * (bounds.x + bounds.width) + transform.c * bounds.y + transform.tx - bounds.x + moveX;
+            float rty = transform.b * (bounds.x + bounds.width) + transform.d * bounds.y + transform.ty - bounds.y + moveY;
+            float lbx = transform.a * bounds.x + transform.c * (bounds.y + bounds.height) + transform.tx - bounds.x + moveX;
+            float lby = transform.b * bounds.x + transform.d * (bounds.y + bounds.height) + transform.ty - bounds.y + moveY;
+            float rbx = transform.a * (bounds.x + bounds.width) + transform.c * (bounds.y + bounds.height) + transform.tx - bounds.x + moveX;
+            float rby = transform.b * (bounds.x + bounds.width) + transform.d * (bounds.y + bounds.height) + transform.ty - bounds.y + moveY;
+            vertices[3] = -1.0f + (ltx / windowBounds.width * 2);
+            vertices[4] = 1.0f - (lty / windowBounds.height * 2);
+            vertices[9] = -1.0f + (rtx / windowBounds.width * 2);
+            vertices[10] = 1.0f - (rty / windowBounds.height * 2);
+            vertices[0] = -1.0f + (lbx / windowBounds.width * 2);
+            vertices[1] = 1.0f - (lby / windowBounds.height * 2);
+            vertices[6] = -1.0f + (rbx / windowBounds.width * 2);
+            vertices[7] = 1.0f - (rby / windowBounds.height * 2);
+        }
+        else {
+            setTransform(transform, anchorPoint, frame, windowBounds);
+        }
     }
 
     private void drawBackgroundColor(GL10 gl) {

@@ -80,8 +80,8 @@ public class CALayerTexture {
         float rty = transform.b * (bounds.x + bounds.width) + transform.d * bounds.y + transform.ty - bounds.y;
         float lbx = transform.a * bounds.x + transform.c * (bounds.y + bounds.height) + transform.tx - bounds.x;
         float lby = transform.b * bounds.x + transform.d * (bounds.y + bounds.height) + transform.ty - bounds.y;
-        float rbx = transform.a * (bounds.x + bounds.width) + transform.c * (bounds.y + frame.height) + transform.tx - bounds.x;
-        float rby = transform.b * (bounds.x + bounds.width) + transform.d * (bounds.y + frame.height) + transform.ty - bounds.y;
+        float rbx = transform.a * (bounds.x + bounds.width) + transform.c * (bounds.y + bounds.height) + transform.tx - bounds.x;
+        float rby = transform.b * (bounds.x + bounds.width) + transform.d * (bounds.y + bounds.height) + transform.ty - bounds.y;
         vertices[3] = -1.0f + (ltx / windowBounds.width * 2);
         vertices[4] = 1.0f - (lty / windowBounds.height * 2);
         vertices[9] = -1.0f + (rtx / windowBounds.width * 2);
