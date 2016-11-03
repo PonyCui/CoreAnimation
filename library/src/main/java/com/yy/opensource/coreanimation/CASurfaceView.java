@@ -27,7 +27,7 @@ public class CASurfaceView extends GLSurfaceView {
 
     private void init() {
         renderer = new CARenderer(getContext(), this);
-        setEGLConfigChooser(8, 8, 8, 8, 16, 0);
+        setEGLConfigChooser(8, 8, 8, 8, 16, 8);
         getHolder().setFormat(PixelFormat.TRANSLUCENT);
         setRenderer(renderer);
     }

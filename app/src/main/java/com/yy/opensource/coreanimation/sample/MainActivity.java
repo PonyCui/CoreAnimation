@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
         testLayer.backgroundColor = new CGColor(0.5f, 0.5f, 0.5f);
         testLayer.opacity = 1.0f;
         testLayer.frame = new CGRect(0,0,150,150);
+//        testLayer.masksToBounds = true;
         testLayer.contentsGravity = "resizeAspectFill";
         surfaceView.layer.addSublayer(testLayer);
 

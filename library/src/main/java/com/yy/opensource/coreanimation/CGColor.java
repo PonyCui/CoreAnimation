@@ -10,6 +10,10 @@ import java.nio.FloatBuffer;
 
 public class CGColor {
 
+    static public CGColor whiteColor = new CGColor(1, 1, 1);
+    static public CGColor blackColor = new CGColor(0, 0, 0);
+    static public CGColor clearColor = new CGColor(1, 1, 1, 0);
+
     private float r = 1.0f;
     private float g = 1.0f;
     private float b = 1.0f;
