@@ -175,14 +175,14 @@ public class CALayer extends CALayerTexture {
             gl.glColor4f(1.0f, 1.0f, 1.0f, combineOpacity());
             gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, vertices.length / 3);
             gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-            enableTextureFeatures(gl);
+            disableTextureFeatures(gl);
         }
-        gl.glDisable(GL10.GL_STENCIL_TEST);
         for (int i = 0; i < subLayers.length; i++) {
             CALayer layer = subLayers[i];
             layer.windowBounds = windowBounds;
             layer.draw(gl);
         }
+        gl.glDisable(GL10.GL_STENCIL_TEST);
     }
 
     protected void setContentTransform(CATransform3D transform, CGPoint anchorPoint, CGRect frame, CGRect windowBounds) {
@@ -344,10 +344,31 @@ public class CALayer extends CALayerTexture {
             return;
         }
         enableMaskFeatures(gl);
-        gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
-        gl.glColorPointer(4, GL10.GL_FLOAT, 0, CGColor.whiteColor.colorBuffer);
-        gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, vertices.length / 3);
+        if (!drawSuperMask(gl)) {
+            gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
+            gl.glColorPointer(4, GL10.GL_FLOAT, 0, CGColor.whiteColor.colorBuffer);
+            gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, vertices.length / 3);
+        }
         disableMaskFeatures(gl);
+    }
+
+    private boolean drawSuperMask(GL10 gl) {
+        CALayer currentLayer = superLayer;
+        while (currentLayer != null) {
+            if (currentLayer.superLayer != null && !currentLayer.superLayer.masksToBounds) {
+                break;
+            }
+            currentLayer = currentLayer.superLayer;
+        }
+        if (currentLayer != null && currentLayer.masksToBounds) {
+            currentLayer.resetVertices();
+            currentLayer.setTransform(superLayer.combineTransform(), currentLayer.anchorPoint, currentLayer.frame, currentLayer.windowBounds);
+            currentLayer.setVertexBufferNeedsUpdate();
+            gl.glVertexPointer(3, GL10.GL_FLOAT, 0, currentLayer.vertexBuffer);
+            gl.glColorPointer(4, GL10.GL_FLOAT, 0, CGColor.whiteColor.colorBuffer);
+            gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, currentLayer.vertices.length / 3);
+        }
+        return currentLayer != null && currentLayer.masksToBounds;
     }
 
     private void enableMaskFeatures(GL10 gl) {
@@ -355,7 +376,6 @@ public class CALayer extends CALayerTexture {
         gl.glEnableClientState(GL10.GL_COLOR_ARRAY);
         gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
         gl.glClearStencil(0);
-        gl.glClear(GL10.GL_STENCIL_BUFFER_BIT);
         gl.glColorMask(false, false, false, false);
         gl.glDepthMask(false);
         gl.glStencilFunc(GL10.GL_ALWAYS, 1, 1);
