@@ -142,6 +142,69 @@ public class CALayer extends CALayerTexture {
     private CALayer[] subLayers = new CALayer[0];
 
     @Override
+    protected void draw(GL10 gl) {
+        super.draw(gl);
+        if (hidden || combineOpacity() <= 0.0) {
+            return;
+        }
+        gl.glFrontFace(GL10.GL_CW);
+        resetVertices();
+        setTransform(combineTransform(), anchorPoint, frame, windowBounds);
+        setVertexBufferNeedsUpdate();
+        drawMask(gl);
+        drawBackgroundColor(gl);
+        drawTextures(gl);
+        gl.glDisable(GL10.GL_STENCIL_TEST);
+        for (int i = 0; i < subLayers.length; i++) {
+            CALayer layer = subLayers[i];
+            layer.windowBounds = windowBounds;
+            layer.draw(gl);
+        }
+    }
+
+    // Backgrounds
+
+    private void drawBackgroundColor(GL10 gl) {
+        if (backgroundColor == null || backgroundColor.isClearColor()) {
+            return;
+        }
+        enableBackgroundFeatures(gl);
+        gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
+        if (combineOpacity() < 1.0) {
+            gl.glColorPointer(4, GL10.GL_FLOAT, 0, backgroundColor.colorWithAlpha(combineOpacity()).colorBuffer);
+        }
+        else {
+            gl.glColorPointer(4, GL10.GL_FLOAT, 0, backgroundColor.colorBuffer);
+        }
+        gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, vertices.length / 3);
+        disableBackgroundFeatures(gl);
+    }
+
+    private void enableBackgroundFeatures(GL10 gl) {
+        gl.glEnableClientState(GL10.GL_COLOR_ARRAY);
+        gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
+        if (!opaque) {
+            gl.glEnable(GL10.GL_BLEND);
+            gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
+            gl.glEnable(GL10.GL_DEPTH_TEST);
+            gl.glEnable(GL10.GL_ALPHA_TEST);
+            gl.glAlphaFunc(GL10.GL_GREATER, 0.0f);
+        }
+    }
+
+    private void disableBackgroundFeatures(GL10 gl) {
+        gl.glDisableClientState(GL10.GL_COLOR_ARRAY);
+        gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
+        if (!opaque) {
+            gl.glDisable(GL10.GL_BLEND);
+            gl.glDisable(GL10.GL_DEPTH_TEST);
+            gl.glDisable(GL10.GL_ALPHA_TEST);
+        }
+    }
+
+    // Textures
+
+    @Override
     protected void loadTexture(GL10 gl) {
         if (textureLoaded) {
             return;
@@ -156,19 +219,8 @@ public class CALayer extends CALayerTexture {
         }
     }
 
-    @Override
-    protected void draw(GL10 gl) {
-        super.draw(gl);
-        gl.glFrontFace(GL10.GL_CW);
-        resetVertices();
-        setTransform(combineTransform(), anchorPoint, frame, windowBounds);
-        setVertexBufferNeedsUpdate();
-        drawMask(gl);
-        drawBackgroundColor(gl);
+    private void drawTextures(GL10 gl) {
         if (textureLoaded) {
-            if (hidden || opacity <= 0.0) {
-                return;
-            }
             resetVertices();
             setContentTransform(combineTransform(), anchorPoint, frame, windowBounds);
             setVertexBufferNeedsUpdate();
@@ -181,15 +233,33 @@ public class CALayer extends CALayerTexture {
             gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
             disableTextureFeatures(gl);
         }
-        gl.glDisable(GL10.GL_STENCIL_TEST);
-        for (int i = 0; i < subLayers.length; i++) {
-            CALayer layer = subLayers[i];
-            layer.windowBounds = windowBounds;
-            layer.draw(gl);
+    }
+
+    private void enableTextureFeatures(GL10 gl) {
+        gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
+        gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
+        gl.glEnable(GL10.GL_TEXTURE_2D);
+        if (!opaque) {
+            gl.glEnable(GL10.GL_BLEND);
+            gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
+            gl.glEnable(GL10.GL_DEPTH_TEST);
+            gl.glEnable(GL10.GL_ALPHA_TEST);
+            gl.glAlphaFunc(GL10.GL_GREATER, 0.0f);
         }
     }
 
-    protected void setContentTransform(CATransform3D transform, CGPoint anchorPoint, CGRect frame, CGRect windowBounds) {
+    private void disableTextureFeatures(GL10 gl) {
+        gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
+        gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
+        gl.glDisable(GL10.GL_TEXTURE_2D);
+        if (!opaque) {
+            gl.glDisable(GL10.GL_BLEND);
+            gl.glDisable(GL10.GL_DEPTH_TEST);
+            gl.glDisable(GL10.GL_ALPHA_TEST);
+        }
+    }
+
+    private void setContentTransform(CATransform3D transform, CGPoint anchorPoint, CGRect frame, CGRect windowBounds) {
         if (contentsGravity.equals("resizeAspect")) {
             CGRect bounds;
             float moveX = 0, moveY = 0;
@@ -275,78 +345,9 @@ public class CALayer extends CALayerTexture {
         }
     }
 
-    // Backgrounds
-
-    private void drawBackgroundColor(GL10 gl) {
-        if (hidden || combineOpacity() <= 0.0 || backgroundColor == null || backgroundColor.isClearColor()) {
-            return;
-        }
-        enableBackgroundFeatures(gl);
-        gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
-        if (combineOpacity() < 1.0) {
-            gl.glColorPointer(4, GL10.GL_FLOAT, 0, backgroundColor.colorWithAlpha(combineOpacity()).colorBuffer);
-        }
-        else {
-            gl.glColorPointer(4, GL10.GL_FLOAT, 0, backgroundColor.colorBuffer);
-        }
-        gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, vertices.length / 3);
-        disableBackgroundFeatures(gl);
-    }
-
-    private void enableBackgroundFeatures(GL10 gl) {
-        gl.glEnableClientState(GL10.GL_COLOR_ARRAY);
-        gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
-        if (!opaque) {
-            gl.glEnable(GL10.GL_BLEND);
-            gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
-            gl.glEnable(GL10.GL_DEPTH_TEST);
-            gl.glEnable(GL10.GL_ALPHA_TEST);
-            gl.glAlphaFunc(GL10.GL_GREATER, 0.0f);
-        }
-    }
-
-    private void disableBackgroundFeatures(GL10 gl) {
-        gl.glDisableClientState(GL10.GL_COLOR_ARRAY);
-        gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
-        if (!opaque) {
-            gl.glDisable(GL10.GL_BLEND);
-            gl.glDisable(GL10.GL_DEPTH_TEST);
-            gl.glDisable(GL10.GL_ALPHA_TEST);
-        }
-    }
-
-    // Textures
-
-    private void enableTextureFeatures(GL10 gl) {
-        gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
-        gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
-        gl.glEnable(GL10.GL_TEXTURE_2D);
-        if (!opaque) {
-            gl.glEnable(GL10.GL_BLEND);
-            gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
-            gl.glEnable(GL10.GL_DEPTH_TEST);
-            gl.glEnable(GL10.GL_ALPHA_TEST);
-            gl.glAlphaFunc(GL10.GL_GREATER, 0.0f);
-        }
-    }
-
-    private void disableTextureFeatures(GL10 gl) {
-        gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
-        gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
-        gl.glDisable(GL10.GL_TEXTURE_2D);
-        if (!opaque) {
-            gl.glDisable(GL10.GL_BLEND);
-            gl.glDisable(GL10.GL_DEPTH_TEST);
-            gl.glDisable(GL10.GL_ALPHA_TEST);
-        }
-    }
-
     // Masks
 
     private void drawMask(GL10 gl) {
-        if (hidden || combineOpacity() <= 0.0) {
-            return;
-        }
         boolean enabled = false;
         gl.glEnable(GL10.GL_STENCIL_TEST);
         gl.glEnableClientState(GL10.GL_COLOR_ARRAY);
@@ -386,60 +387,6 @@ public class CALayer extends CALayerTexture {
             gl.glDisable(GL10.GL_STENCIL_TEST);
         }
     }
-
-    private void combineMask(GL10 gl) {
-//        ArrayList<CALayer> maskLayerStack = new ArrayList<>();
-//        CALayer current = superLayer;
-//        while (current != null) {
-//            if (current.masksToBounds) {
-//                maskLayerStack.add(current);
-//            }
-//            current = current.superLayer;
-//        }
-//        if (maskLayerStack.size() > 0) {
-//            gl.glEnable(GL10.GL_STENCIL_TEST);
-//            gl.glEnableClientState(GL10.GL_COLOR_ARRAY);
-//            gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
-//            gl.glClearStencil(0);
-//            gl.glColorMask(false, false, false, false);
-//            gl.glDepthMask(false);
-//            gl.glStencilFunc(GL10.GL_ALWAYS, 1, 1);
-//            for (int i = 0; i < maskLayerStack.size(); i++) {
-//                CALayer layer = maskLayerStack.get(i);
-//                layer.resetVertices();
-//                layer.setTransform(combineTransform(), anchorPoint, frame, windowBounds);
-//                layer.setVertexBufferNeedsUpdate();
-//                if (i == 0) {
-//
-//                }
-//
-//            }
-//        }
-//        else {
-//
-//        }
-    }
-
-    private void enableMaskFeatures(GL10 gl) {
-        gl.glEnable(GL10.GL_STENCIL_TEST);
-        gl.glEnableClientState(GL10.GL_COLOR_ARRAY);
-        gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
-        gl.glClearStencil(0);
-        gl.glColorMask(false, false, false, false);
-        gl.glDepthMask(false);
-        gl.glStencilFunc(GL10.GL_ALWAYS, 1, 1);
-        gl.glStencilOp(GL10.GL_REPLACE, GL10.GL_REPLACE, GL10.GL_REPLACE);
-    }
-
-    private void disableMaskFeatures(GL10 gl) {
-        gl.glDisableClientState(GL10.GL_COLOR_ARRAY);
-        gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
-        gl.glColorMask(true, true, true, true);
-        gl.glDepthMask(true);
-        gl.glStencilFunc(GL10.GL_EQUAL, 1, 1);
-        gl.glStencilOp(GL10.GL_KEEP, GL10.GL_KEEP, GL10.GL_KEEP);
-    }
-
 
     // Helpers
 
