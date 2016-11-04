@@ -33,14 +33,14 @@ public class MainActivity extends AppCompatActivity {
         testLayer.backgroundColor = new CGColor(0.5f, 0.5f, 0.5f);
         testLayer.opacity = 1.0f;
         testLayer.frame = new CGRect(0,0,150,250);
-//        testLayer.masksToBounds = true;
+        testLayer.masksToBounds = false;
         testLayer.contentsGravity = "resizeAspectFill";
         surfaceView.layer.addSublayer(testLayer);
 
         CALayer sLayer = new CALayer();
         sLayer.frame = new CGRect(150, 250, 150, 250);
         sLayer.backgroundColor = new CGColor(0.5f, 0.5f, 0.5f);
-        sLayer.masksToBounds = true;
+        sLayer.masksToBounds = false;
         sLayer.setContents(bitmap);
         testLayer.addSublayer(sLayer);
 
