@@ -57,6 +57,9 @@ class CALayerTexture {
                 textureCaches.put(layer.contents, item);
             }
             item.loadTexture(gl);
+            if (!item.loaded) {
+                return;
+            }
             gl.glBindTexture(GL10.GL_TEXTURE_2D, item.textureID[0]);
             enableTextureFeatures(layer, gl);
             gl.glVertexPointer(3, GL10.GL_FLOAT, 0, CALayerHelper.requestContentVertexBuffer(CALayerHelper.combineTransform(layer), layer.anchorPoint, layer.frame, layer.windowBounds, layer));
@@ -98,13 +101,13 @@ class CABitmapTextureEntity {
 
     protected int[] textureID = new int[1];
     protected Bitmap bitmap = null;
-    private boolean loaded = false;
+    protected boolean loaded = false;
 
     protected void loadTexture(GL10 gl) {
         if (loaded) {
             return;
         }
-        if (null != bitmap) {
+        if (null != bitmap && !bitmap.isRecycled()) {
             gl.glGenTextures(1, textureID, 0);
             gl.glBindTexture(GL10.GL_TEXTURE_2D, textureID[0]);
             gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST);

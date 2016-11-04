@@ -89,7 +89,6 @@ public class CALayer {
         this.contents = bitmap;
         this.contentSize.width = (float)bitmap.getWidth();
         this.contentSize.height = (float)bitmap.getHeight();
-//        textureLoaded = false;
     }
 
     public CALayer[] getSubLayers() {
