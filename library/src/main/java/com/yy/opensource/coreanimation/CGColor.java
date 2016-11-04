@@ -65,6 +65,22 @@ public class CGColor {
         return this.a <= 0.0f;
     }
 
+    public float getA() {
+        return a;
+    }
+
+    public float getB() {
+        return b;
+    }
+
+    public float getG() {
+        return g;
+    }
+
+    public float getR() {
+        return r;
+    }
+
     private void resetBuffer() {
         float[] colors = {
                 r, g, b, a,
