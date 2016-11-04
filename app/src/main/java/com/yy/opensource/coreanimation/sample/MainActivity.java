@@ -24,7 +24,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         final CASurfaceView surfaceView = new CASurfaceView(this);
         surfaceView.disableAutoRefresh();
-        surfaceView.FPS = 60;
         surfaceView.setZOrderOnTop(true);
 
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.test);

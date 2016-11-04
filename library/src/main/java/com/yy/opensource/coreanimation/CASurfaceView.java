@@ -13,7 +13,6 @@ public class CASurfaceView extends GLSurfaceView {
 
     private CARenderer renderer;
     public CALayer layer = new CALayer();
-    public int FPS = 60;
 
     public CASurfaceView(Context context) {
         super(context);
