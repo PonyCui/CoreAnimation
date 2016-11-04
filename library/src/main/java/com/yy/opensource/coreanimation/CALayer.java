@@ -85,6 +85,8 @@ public class CALayer {
      */
     public Boolean masksToBounds = false;
 
+    public CALayer mask = null; // todo
+
     public void setContents(Bitmap bitmap) {
         this.contents = bitmap;
         this.contentSize.width = (float)bitmap.getWidth();
@@ -162,13 +164,17 @@ public class CALayer {
         gl.glFrontFace(GL10.GL_CW);
         CALayerMask.drawMask(this, gl);
         CALayerBackground.drawBackgroundColor(this, gl);
-        CALayerTexture.drawTextures(this, gl);
+        drawContents(gl);
         gl.glDisable(GL10.GL_STENCIL_TEST);
         for (int i = 0; i < subLayers.length; i++) {
             CALayer layer = subLayers[i];
             layer.windowBounds = windowBounds;
             layer.draw(gl);
         }
+    }
+
+    protected void drawContents(GL10 gl) {
+        CALayerTexture.drawTextures(this, gl);
     }
 
 }

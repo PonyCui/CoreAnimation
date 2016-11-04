@@ -25,7 +25,6 @@ public class CARenderer implements GLSurfaceView.Renderer {
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
         gl10.glEnable(GL10.GL_TEXTURE_2D);
         gl10.glEnable(GL10.GL_BLEND);
-        gl10.glShadeModel(GL10.GL_SMOOTH);
         gl10.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         gl10.glClearDepthf(1.0f);
         gl10.glEnable(GL10.GL_DEPTH_TEST);

@@ -40,7 +40,13 @@ class CALayerMask {
                 gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
                 gl.glStencilFunc(GL10.GL_ALWAYS, 1, 1);
                 gl.glStencilOp(GL10.GL_REPLACE, GL10.GL_REPLACE, GL10.GL_REPLACE);
-                gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, vertices.length / 3);
+                if (current.mask != null) {
+                    current.mask.windowBounds = current.windowBounds;
+                    current.mask.drawContents(gl);
+                }
+                else {
+                    gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, vertices.length / 3);
+                }
                 lastBuffer = vertexBuffer;
             }
             current = current.superLayer;
