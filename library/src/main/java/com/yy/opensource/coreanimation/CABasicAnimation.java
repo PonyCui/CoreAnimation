@@ -12,19 +12,20 @@ public class CABasicAnimation<T> extends CAPropertyAnimation {
     @Override
     protected void duration(long currentTimeMillis) {
         super.duration(currentTimeMillis);
+        resetFromValue();
         if (Number.class.isAssignableFrom(fromValue.getClass()) && Number.class.isAssignableFrom(toValue.getClass())) {
             float _fromValue = ((Number)fromValue).floatValue();
             float _toValue = ((Number)toValue).floatValue();
             if (duration == 0.0) {
                 setValue(_toValue);
-                end();
+                end(true);
                 return;
             }
             float progress = Math.min(1.0f, currentTimeMillis / (duration * 1000));
             float _newValue = _fromValue + (_toValue - _fromValue) * progress;
             setValue(_newValue);
             if (progress == 1.0) {
-                end();
+                end(true);
             }
         }
         else if (CGRect.class.isAssignableFrom(fromValue.getClass()) && CGRect.class.isAssignableFrom(toValue.getClass())) {
@@ -32,7 +33,7 @@ public class CABasicAnimation<T> extends CAPropertyAnimation {
             CGRect _toValue = (CGRect)toValue;
             if (duration == 0.0) {
                 setValue(_toValue);
-                end();
+                end(true);
                 return;
             }
             float progress = Math.min(1.0f, currentTimeMillis / (duration * 1000));
@@ -44,7 +45,7 @@ public class CABasicAnimation<T> extends CAPropertyAnimation {
             );
             setValue(_newValue);
             if (progress == 1.0) {
-                end();
+                end(true);
             }
         }
         else if (CATransform3D.class.isAssignableFrom(fromValue.getClass()) && CATransform3D.class.isAssignableFrom(toValue.getClass())) {
@@ -52,7 +53,7 @@ public class CABasicAnimation<T> extends CAPropertyAnimation {
             CATransform3D _toValue = (CATransform3D)toValue;
             if (duration == 0.0) {
                 setValue(_toValue);
-                end();
+                end(true);
                 return;
             }
             float progress = Math.min(1.0f, currentTimeMillis / (duration * 1000));
@@ -65,7 +66,33 @@ public class CABasicAnimation<T> extends CAPropertyAnimation {
             _newValue.ty = _fromValue.ty + (_toValue.ty - _fromValue.ty) * progress;
             setValue(_newValue);
             if (progress == 1.0) {
-                end();
+                end(true);
+            }
+        }
+    }
+
+    protected void resetFromValue() {
+        if (fromValue == null) {
+            if (keyPath.equalsIgnoreCase("transform")) {
+                fromValue = (T) layer.transform;
+            }
+            else if (keyPath.equalsIgnoreCase("frame")) {
+                fromValue = (T) layer.frame;
+            }
+            else if (keyPath.equalsIgnoreCase("opacity")) {
+                fromValue = (T) new CANumber(layer.opacity);
+            }
+            else if (keyPath.equalsIgnoreCase("frame.x")) {
+                fromValue = (T) new CANumber(layer.frame.x);
+            }
+            else if (keyPath.equalsIgnoreCase("frame.y")) {
+                fromValue = (T) new CANumber(layer.frame.y);
+            }
+            else if (keyPath.equalsIgnoreCase("frame.width")) {
+                fromValue = (T) new CANumber(layer.frame.width);
+            }
+            else if (keyPath.equalsIgnoreCase("frame.height")) {
+                fromValue = (T) new CANumber(layer.frame.height);
             }
         }
     }
@@ -107,5 +134,35 @@ public class CABasicAnimation<T> extends CAPropertyAnimation {
         }
     }
 
+
+}
+
+class CANumber extends Number {
+
+    float mValue;
+
+    public CANumber(float value) {
+        mValue = value;
+    }
+
+    @Override
+    public int intValue() {
+        return (int)mValue;
+    }
+
+    @Override
+    public long longValue() {
+        return (long)mValue;
+    }
+
+    @Override
+    public float floatValue() {
+        return mValue;
+    }
+
+    @Override
+    public double doubleValue() {
+        return (double)mValue;
+    }
 
 }

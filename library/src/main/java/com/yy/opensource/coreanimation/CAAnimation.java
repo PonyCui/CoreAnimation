@@ -25,6 +25,7 @@ public class CAAnimation {
     protected CALayer layer = null;
     protected long beginTime = 0;
     protected CADisplayLink displayLink = null;
+    protected boolean markEnded = false;
 
     protected void start() {
         if (layer == null) {
@@ -38,17 +39,27 @@ public class CAAnimation {
                 duration(System.currentTimeMillis() - beginTime);
             }
         });
+        if (delegate != null) {
+            delegate.animationDidStart(this);
+        }
     }
 
     protected void duration(long currentTimeMillis) {
 
     }
 
-    protected void end() {
+    protected void end(boolean finished) {
+        if (markEnded) {
+            return;
+        }
+        markEnded = true;
         beginTime = 0;
         if (displayLink != null) {
             displayLink.invalidate();
             displayLink = null;
+        }
+        if (delegate != null) {
+            delegate.animationDidStop(this, finished);
         }
     }
 

@@ -14,6 +14,8 @@ import android.os.Bundle;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 
+import com.yy.opensource.coreanimation.CAAnimation;
+import com.yy.opensource.coreanimation.CAAnimationDelegate;
 import com.yy.opensource.coreanimation.CABasicAnimation;
 import com.yy.opensource.coreanimation.CADisplayLink;
 import com.yy.opensource.coreanimation.CADisplayLinkDelegate;
@@ -71,9 +73,25 @@ public class MainActivity extends AppCompatActivity {
                     public void run() {
                         CABasicAnimation<CGRect> animation = new CABasicAnimation<>();
                         animation.keyPath = "frame";
-                        animation.duration = 10.0f;
-                        animation.fromValue = new CGRect(0,0,150,250);
-                        animation.toValue = new CGRect(0,0,300,500);
+                        animation.duration = 0.30f;
+                        animation.toValue = new CGRect(100,100,150,250);
+                        animation.delegate = new CAAnimationDelegate() {
+                            @Override
+                            public void animationDidStart(CAAnimation animation) {
+
+                            }
+
+                            @Override
+                            public void animationDidStop(CAAnimation animation, boolean finished) {
+                                if (finished) {
+                                    CABasicAnimation<CGRect> animations2 = new CABasicAnimation<>();
+                                    animations2.keyPath = "frame";
+                                    animations2.duration = 0.30f;
+                                    animations2.toValue = new CGRect(100,200,150,250);
+                                    testLayer.addAnimation(animations2, "_");
+                                }
+                            }
+                        };
                         testLayer.addAnimation(animation, "_");
                     }
                 });

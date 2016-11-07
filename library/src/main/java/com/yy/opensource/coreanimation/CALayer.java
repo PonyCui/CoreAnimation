@@ -1,6 +1,10 @@
 package com.yy.opensource.coreanimation;
 
 import android.graphics.Bitmap;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.microedition.khronos.opengles.GL10;
 
 /**
@@ -159,14 +163,32 @@ public class CALayer {
     }
 
     public void addAnimation(CAAnimation animation, String animationKey) {
+        if (animations.get(animationKey) != null) {
+            animations.get(animationKey).end(false);
+            animations.remove(animationKey);
+        }
+        animations.put(animationKey, animation);
         animation.layer = this;
         animation.start();
+    }
+
+    public void removeAllAnimations() {
+        for (Map.Entry<String, CAAnimation> entry: animations.entrySet()) {
+            entry.getValue().end(false);
+            animations.remove(entry.getKey());
+        }
+    }
+
+    public void removeAnimation(String animationKey) {
+        if (animations.get(animationKey) != null) {
+            animations.get(animationKey).end(false);
+            animations.remove(animationKey);
+        }
     }
 
     /**
      * Private props and methods!!!
      */
-
 
     /**
      * Refer's to super CASurfaceView.
@@ -197,6 +219,11 @@ public class CALayer {
      * Gets subLayers here.
      */
     protected CALayer[] subLayers = new CALayer[0];
+
+    /**
+     * Stores current animations.
+     */
+    protected HashMap<String, CAAnimation> animations = new HashMap<>();
 
     protected void draw(GL10 gl) {
         if (hidden || CALayerHelper.combineOpacity(this) <= 0.0) {
