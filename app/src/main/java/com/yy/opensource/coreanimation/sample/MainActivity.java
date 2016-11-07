@@ -7,17 +7,20 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Path;
 import android.os.Build;
+import android.os.Handler;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 
+import com.yy.opensource.coreanimation.CABasicAnimation;
 import com.yy.opensource.coreanimation.CADisplayLink;
 import com.yy.opensource.coreanimation.CADisplayLinkDelegate;
 import com.yy.opensource.coreanimation.CALayer;
 import com.yy.opensource.coreanimation.CAShapeLayer;
 import com.yy.opensource.coreanimation.CASurfaceView;
+import com.yy.opensource.coreanimation.CATransform3D;
 import com.yy.opensource.coreanimation.CGColor;
 import com.yy.opensource.coreanimation.CGPoint;
 import com.yy.opensource.coreanimation.CGRect;
@@ -27,8 +30,8 @@ import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
 
-    CADisplayLink displayLink;
-    int degree = 0;
+//    CADisplayLink displayLink;
+//    int degree = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +58,28 @@ public class MainActivity extends AppCompatActivity {
 //        testLayer.contentsGravity = "resizeAspectFill";
 //        testLayer.mask = layer;
 
+
         surfaceView.layer.addSublayer(testLayer);
+
+        final Handler handler = new Handler();
+
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        CABasicAnimation<CGRect> animation = new CABasicAnimation<>();
+                        animation.keyPath = "frame";
+                        animation.duration = 10.0f;
+                        animation.fromValue = new CGRect(0,0,150,250);
+                        animation.toValue = new CGRect(0,0,300,500);
+                        testLayer.addAnimation(animation, "_");
+                    }
+                });
+            }
+        }, 1000);
+
 //
 //
 ////        Bitmap maskBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.masktest);
@@ -84,15 +108,15 @@ public class MainActivity extends AppCompatActivity {
 //        surfaceView.setNeedsDisplay();
 
 
-        displayLink = new CADisplayLink();
-        displayLink.setHandler(new CADisplayLinkDelegate() {
-            @Override
-            public void onDrawFrame() {
-                degree++;
-                testLayer.transform.reset().postRotate(degree);
-                testLayer.setNeedsDisplay();
-            }
-        });
+//        displayLink = new CADisplayLink();
+//        displayLink.setHandler(new CADisplayLinkDelegate() {
+//            @Override
+//            public void onDrawFrame() {
+//                degree++;
+//                testLayer.transform.reset().postRotate(degree);
+//                testLayer.setNeedsDisplay();
+//            }
+//        });
 
         FrameLayout frameLayout = new FrameLayout(this);
         frameLayout.addView(surfaceView);

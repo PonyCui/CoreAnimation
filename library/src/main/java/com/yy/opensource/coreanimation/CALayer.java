@@ -158,6 +158,11 @@ public class CALayer {
         }
     }
 
+    public void addAnimation(CAAnimation animation, String animationKey) {
+        animation.layer = this;
+        animation.start();
+    }
+
     /**
      * Private props and methods!!!
      */
