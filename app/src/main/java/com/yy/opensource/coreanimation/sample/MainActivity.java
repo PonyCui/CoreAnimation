@@ -1,14 +1,20 @@
 package com.yy.opensource.coreanimation.sample;
 
+import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Path;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 
+import com.yy.opensource.coreanimation.CADisplayLink;
+import com.yy.opensource.coreanimation.CADisplayLinkDelegate;
 import com.yy.opensource.coreanimation.CALayer;
 import com.yy.opensource.coreanimation.CAShapeLayer;
 import com.yy.opensource.coreanimation.CASurfaceView;
@@ -20,6 +26,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
+
+    CADisplayLink displayLink;
+    int degree = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,8 +52,9 @@ public class MainActivity extends AppCompatActivity {
         testLayer.opacity = 1.0f;
         testLayer.frame = new CGRect(0,0,150,250);
         testLayer.masksToBounds = true;
-        testLayer.contentsGravity = "resizeAspectFill";
-        testLayer.mask = layer;
+//        testLayer.contentsGravity = "resizeAspectFill";
+//        testLayer.mask = layer;
+
         surfaceView.layer.addSublayer(testLayer);
 //
 //
@@ -71,7 +81,18 @@ public class MainActivity extends AppCompatActivity {
 ////
 ////        sLayer.removeFromSuperLayer();
 
-        surfaceView.setNeedsDisplay();
+//        surfaceView.setNeedsDisplay();
+
+
+        displayLink = new CADisplayLink();
+        displayLink.setHandler(new CADisplayLinkDelegate() {
+            @Override
+            public void onDrawFrame() {
+                degree++;
+                testLayer.transform.reset().postRotate(degree);
+                testLayer.setNeedsDisplay();
+            }
+        });
 
         FrameLayout frameLayout = new FrameLayout(this);
         frameLayout.addView(surfaceView);

@@ -85,12 +85,26 @@ public class CALayer {
      */
     public Boolean masksToBounds = false;
 
-    public CALayer mask = null; // todo
+    /** A layer whose alpha channel is used as a mask to select between the
+     * layer's background and the result of compositing the layer's
+     * contents with its filtered background. Defaults to nil.
+     */
+    public CALayer mask = null;
 
     public void setContents(Bitmap bitmap) {
+        if (this.contents != null) {
+            CALayerTexture.releaseBitmap(this.contents);
+        }
+        if (bitmap == null) {
+            this.contents = null;
+            return;
+        }
         this.contents = bitmap;
         this.contentSize.width = (float)bitmap.getWidth();
         this.contentSize.height = (float)bitmap.getHeight();
+        if (this.contents != null) {
+            CALayerTexture.retainBitmap(this.contents);
+        }
     }
 
     public CALayer[] getSubLayers() {
@@ -126,11 +140,33 @@ public class CALayer {
                 superLayer.subLayers = newElements;
             }
         }
+        releaseContents();
+    }
+
+    public void releaseContents() {
+        if (this.contents != null) {
+            CALayerTexture.releaseBitmap(this.contents);
+        }
+        for (int i = 0; i < subLayers.length; i++) {
+            subLayers[i].releaseContents();
+        }
+    }
+
+    public void setNeedsDisplay() {
+        if (surfaceView != null) {
+            surfaceView.setNeedsDisplay();
+        }
     }
 
     /**
      * Private props and methods!!!
      */
+
+
+    /**
+     * Refer's to super CASurfaceView.
+     */
+    protected CASurfaceView surfaceView = null;
 
     /**
      * Describe root window bounds.
@@ -168,6 +204,7 @@ public class CALayer {
         gl.glDisable(GL10.GL_STENCIL_TEST);
         for (int i = 0; i < subLayers.length; i++) {
             CALayer layer = subLayers[i];
+            layer.surfaceView = surfaceView;
             layer.windowBounds = windowBounds;
             layer.draw(gl);
         }

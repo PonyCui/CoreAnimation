@@ -9,6 +9,7 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -47,6 +48,26 @@ class CALayerTexture {
         textureBuffer.position(0);
     }
 
+    static protected void retainBitmap(Bitmap bitmap) {
+        CABitmapTextureEntity item = textureCaches.get(bitmap);
+        if (item != null) {
+            item.retain();
+        }
+        else {
+            item = new CABitmapTextureEntity();
+            item.bitmap = bitmap;
+            item.retain();
+            textureCaches.put(bitmap, item);
+        }
+    }
+
+    static protected void releaseBitmap(Bitmap bitmap) {
+        CABitmapTextureEntity item = textureCaches.get(bitmap);
+        if (item != null) {
+            item.release();
+        }
+    }
+
     static void drawTextures(CALayer layer, GL10 gl) {
         init();
         if (layer.contents != null) {
@@ -69,6 +90,7 @@ class CALayerTexture {
             gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
             disableTextureFeatures(layer, gl);
         }
+        gc(gl);
     }
 
     static private void enableTextureFeatures(CALayer layer, GL10 gl) {
@@ -95,6 +117,18 @@ class CALayerTexture {
         }
     }
 
+    static private void gc(GL10 gl) {
+        int rand =(int)(Math.random() * 11);
+        if (rand == 0) {
+            for (Map.Entry<Bitmap, CABitmapTextureEntity> entry : textureCaches.entrySet()) {
+                if (entry.getValue().retainCount <= 0) {
+                    entry.getValue().deleteTexture(gl);
+                    textureCaches.remove(entry.getKey());
+                }
+            }
+        }
+    }
+
 }
 
 class CABitmapTextureEntity {
@@ -102,6 +136,7 @@ class CABitmapTextureEntity {
     protected int[] textureID = new int[1];
     protected Bitmap bitmap = null;
     protected boolean loaded = false;
+    protected int retainCount = 0;
 
     protected void loadTexture(GL10 gl) {
         if (loaded) {
@@ -123,6 +158,14 @@ class CABitmapTextureEntity {
         }
         gl.glDeleteTextures(1, textureID, 0);
         loaded = false;
+    }
+
+    protected void retain() {
+        retainCount++;
+    }
+
+    protected void release() {
+        retainCount--;
     }
 
 }

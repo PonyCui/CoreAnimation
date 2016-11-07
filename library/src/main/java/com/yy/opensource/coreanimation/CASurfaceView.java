@@ -29,6 +29,7 @@ public class CASurfaceView extends GLSurfaceView {
         setEGLConfigChooser(8, 8, 8, 8, 16, 8);
         getHolder().setFormat(PixelFormat.TRANSLUCENT);
         setRenderer(renderer);
+        disableAutoRefresh();
     }
 
     public void enabledAutoRefresh() {
