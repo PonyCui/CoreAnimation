@@ -173,7 +173,8 @@ public class CALayer {
     }
 
     public void removeAllAnimations() {
-        for (Map.Entry<String, CAAnimation> entry: animations.entrySet()) {
+        HashMap<String, CAAnimation> oldValues = animations;
+        for (Map.Entry<String, CAAnimation> entry: oldValues.entrySet()) {
             entry.getValue().end(false);
             animations.remove(entry.getKey());
         }
