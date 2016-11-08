@@ -120,7 +120,7 @@ class CALayerTexture {
     static private void gc(GL10 gl) {
         int rand =(int)(Math.random() * 11);
         if (rand == 0) {
-            HashMap<Bitmap, CABitmapTextureEntity> oldValues = textureCaches;
+            HashMap<Bitmap, CABitmapTextureEntity> oldValues = new HashMap<>(textureCaches);
             for (Map.Entry<Bitmap, CABitmapTextureEntity> entry : oldValues.entrySet()) {
                 if (entry.getValue().retainCount <= 0) {
                     entry.getValue().deleteTexture(gl);
