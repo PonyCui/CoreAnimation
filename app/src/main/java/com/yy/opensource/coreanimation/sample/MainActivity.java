@@ -50,19 +50,19 @@ public class MainActivity extends AppCompatActivity {
         layer.fillColor = new CGColor(255,255,255);
 //        surfaceView.layer.addSublayer(layer);
 
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.test);
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.test_alpha_half);
         final CALayer testLayer = new CALayer();
         testLayer.setContents(bitmap);
 //        testLayer.backgroundColor = new CGColor(0.5f, 0.5f, 0.5f);
         testLayer.opacity = 1.0f;
         testLayer.frame = new CGRect(0,0,250,350);
-        testLayer.masksToBounds = true;
+//        testLayer.masksToBounds = true;
 //        testLayer.transform.postScale(3.0f, 3.0f);
 //        layer.transform.reset().setMatrix(testLayer.transform.requestMatrix());
 //        testLayer.contentsGravity = "resizeAspectFill";
-        testLayer.mask = layer;
+//        testLayer.mask = layer;
 
-//        surfaceView.layer.backgroundColor = new CGColor(255,255,255);
+//        surfaceView.layer.backgroundColor = new CGColor(255,255,0);
         surfaceView.layer.addSublayer(testLayer);
 
 //
@@ -103,6 +103,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        surfaceView.setBackgroundColor(Color.BLACK);
         FrameLayout frameLayout = new FrameLayout(this);
         frameLayout.addView(surfaceView);
         frameLayout.setBackgroundColor(Color.BLACK);

@@ -85,7 +85,8 @@ class CALayerTexture {
             enableTextureFeatures(layer, gl);
             gl.glVertexPointer(3, GL10.GL_FLOAT, 0, CALayerHelper.requestContentVertexBuffer(CALayerHelper.combineTransform(layer), layer.anchorPoint, layer.frame, layer.windowBounds, layer));
             gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, textureBuffer);
-            gl.glColor4f(1.0f, 1.0f, 1.0f, CALayerHelper.combineOpacity(layer));
+            float alpha = CALayerHelper.combineOpacity(layer);
+            gl.glColor4f(1.0f * alpha, 1.0f * alpha, 1.0f * alpha, alpha);
             gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, vertices.length / 3);
             gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
             disableTextureFeatures(layer, gl);
