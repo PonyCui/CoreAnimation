@@ -41,9 +41,9 @@ class CALayerMask {
                 gl.glStencilFunc(GL10.GL_ALWAYS, 1, 1);
                 gl.glStencilOp(GL10.GL_REPLACE, GL10.GL_REPLACE, GL10.GL_REPLACE);
                 if (current.mask != null) {
-                    current.mask.superLayer = current;
                     current.mask.surfaceView = current.surfaceView;
                     current.mask.windowBounds = current.windowBounds;
+                    current.mask.transform = CALayerHelper.combineTransform(current);
                     current.mask.drawContents(gl);
                 }
                 else {
