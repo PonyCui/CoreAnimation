@@ -32,8 +32,8 @@ import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
 
-//    CADisplayLink displayLink;
-//    int degree = 0;
+    CADisplayLink displayLink;
+    int degree = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,24 +43,26 @@ public class MainActivity extends AppCompatActivity {
         surfaceView.setZOrderOnTop(true);
 
         CAShapeLayer layer = new CAShapeLayer();
-        layer.frame = new CGRect(0,0,150,250);
+        layer.frame = new CGRect(0,0,250,350);
         Path path = new Path();
-        path.addCircle(50, 50, 200, Path.Direction.CCW);
+        path.addCircle(150, 150, 50, Path.Direction.CCW);
         layer.path = path;
         layer.fillColor = new CGColor(255,255,255);
 //        surfaceView.layer.addSublayer(layer);
 
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.round);
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.test);
         final CALayer testLayer = new CALayer();
         testLayer.setContents(bitmap);
 //        testLayer.backgroundColor = new CGColor(0.5f, 0.5f, 0.5f);
         testLayer.opacity = 1.0f;
-        testLayer.frame = new CGRect(0,0,250,250);
-//        testLayer.masksToBounds = true;
+        testLayer.frame = new CGRect(0,0,250,350);
+        testLayer.masksToBounds = true;
+//        testLayer.transform.postScale(3.0f, 3.0f);
+//        layer.transform.reset().setMatrix(testLayer.transform.requestMatrix());
 //        testLayer.contentsGravity = "resizeAspectFill";
-//        testLayer.mask = layer;
+        testLayer.mask = layer;
 
-        surfaceView.layer.backgroundColor = new CGColor(255,255,255);
+//        surfaceView.layer.backgroundColor = new CGColor(255,255,255);
         surfaceView.layer.addSublayer(testLayer);
 
 //
@@ -91,15 +93,15 @@ public class MainActivity extends AppCompatActivity {
 //        surfaceView.setNeedsDisplay();
 
 
-//        displayLink = new CADisplayLink();
-//        displayLink.setHandler(new CADisplayLinkDelegate() {
-//            @Override
-//            public void onDrawFrame() {
-//                degree++;
-//                testLayer.transform.reset().postRotate(degree);
-//                testLayer.setNeedsDisplay();
-//            }
-//        });
+        displayLink = new CADisplayLink();
+        displayLink.setHandler(new CADisplayLinkDelegate() {
+            @Override
+            public void onDrawFrame() {
+                degree++;
+                testLayer.transform.reset().postRotate(degree);
+                testLayer.setNeedsDisplay();
+            }
+        });
 
         FrameLayout frameLayout = new FrameLayout(this);
         frameLayout.addView(surfaceView);
