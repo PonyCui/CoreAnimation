@@ -35,7 +35,7 @@ class CALayerBackground {
         gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
         if (!layer.opaque) {
             gl.glEnable(GL10.GL_BLEND);
-            gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
+            gl.glBlendFunc(GL10.GL_ONE, GL10.GL_ONE_MINUS_SRC_ALPHA);
             gl.glEnable(GL10.GL_DEPTH_TEST);
             gl.glEnable(GL10.GL_ALPHA_TEST);
             gl.glAlphaFunc(GL10.GL_GREATER, 0.0f);
