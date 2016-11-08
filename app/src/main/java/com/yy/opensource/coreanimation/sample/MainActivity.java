@@ -50,53 +50,18 @@ public class MainActivity extends AppCompatActivity {
         layer.fillColor = new CGColor(255,255,255);
 //        surfaceView.layer.addSublayer(layer);
 
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.test);
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.round);
         final CALayer testLayer = new CALayer();
         testLayer.setContents(bitmap);
-        testLayer.backgroundColor = new CGColor(0.5f, 0.5f, 0.5f);
+//        testLayer.backgroundColor = new CGColor(0.5f, 0.5f, 0.5f);
         testLayer.opacity = 1.0f;
-        testLayer.frame = new CGRect(0,0,150,250);
-        testLayer.masksToBounds = true;
+        testLayer.frame = new CGRect(0,0,250,250);
+//        testLayer.masksToBounds = true;
 //        testLayer.contentsGravity = "resizeAspectFill";
 //        testLayer.mask = layer;
 
-
+        surfaceView.layer.backgroundColor = new CGColor(255,255,255);
         surfaceView.layer.addSublayer(testLayer);
-
-        final Handler handler = new Handler();
-
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        CABasicAnimation<CGRect> animation = new CABasicAnimation<>();
-                        animation.keyPath = "frame";
-                        animation.duration = 0.30f;
-                        animation.toValue = new CGRect(100,100,150,250);
-                        animation.delegate = new CAAnimationDelegate() {
-                            @Override
-                            public void animationDidStart(CAAnimation animation) {
-
-                            }
-
-                            @Override
-                            public void animationDidStop(CAAnimation animation, boolean finished) {
-                                if (finished) {
-                                    CABasicAnimation<CGRect> animations2 = new CABasicAnimation<>();
-                                    animations2.keyPath = "frame";
-                                    animations2.duration = 0.30f;
-                                    animations2.toValue = new CGRect(100,200,150,250);
-                                    testLayer.addAnimation(animations2, "_");
-                                }
-                            }
-                        };
-                        testLayer.addAnimation(animation, "_");
-                    }
-                });
-            }
-        }, 1000);
 
 //
 //
