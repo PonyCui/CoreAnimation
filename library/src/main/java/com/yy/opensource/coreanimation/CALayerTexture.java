@@ -127,11 +127,14 @@ class CALayerTexture {
     static private void gc(GL10 gl) {
         int rand =(int)(Math.random() * 11);
         if (rand == 0) {
-            HashMap<String, CABitmapTextureEntity> oldValues = new HashMap<>(textureCaches);
-            for (Map.Entry<String, CABitmapTextureEntity> entry : oldValues.entrySet()) {
+            HashMap<String, CABitmapTextureEntity> newValues = new HashMap<>();
+            for (Map.Entry<String, CABitmapTextureEntity> entry : textureCaches.entrySet()) {
                 if (entry.getValue().retainCount <= 0) {
                     entry.getValue().deleteTexture(gl);
-                    textureCaches.remove(entry.getKey());
+                    continue;
+                }
+                else {
+                    newValues.put(entry.getKey(), entry.getValue());
                 }
             }
         }
