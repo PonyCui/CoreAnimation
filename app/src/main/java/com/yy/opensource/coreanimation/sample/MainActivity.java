@@ -33,7 +33,7 @@ import java.util.TimerTask;
 public class MainActivity extends AppCompatActivity {
 
     CADisplayLink displayLink;
-    int degree = 0;
+    int degree = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,13 +42,14 @@ public class MainActivity extends AppCompatActivity {
         surfaceView.disableAutoRefresh();
         surfaceView.setZOrderOnTop(true);
 
-        CAShapeLayer layer = new CAShapeLayer();
-        layer.frame = new CGRect(0,0,250,350);
+        final CAShapeLayer shapeLayer = new CAShapeLayer();
+        shapeLayer.frame = new CGRect(0,0,250,350);
         Path path = new Path();
-        path.addCircle(150, 150, 50, Path.Direction.CCW);
-        layer.path = path;
-        layer.fillColor = new CGColor(255,255,255);
-//        surfaceView.layer.addSublayer(layer);
+        path.addCircle(150, 150, degree, Path.Direction.CCW);
+        shapeLayer.setPath(path);
+        shapeLayer.fillColor = new CGColor(255,255,255);
+
+//        surfaceView.shapeLayer.addSublayer(shapeLayer);
 
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.test_alpha_half);
         final CALayer testLayer = new CALayer();
@@ -58,12 +59,28 @@ public class MainActivity extends AppCompatActivity {
         testLayer.frame = new CGRect(0,0,250,350);
 //        testLayer.masksToBounds = true;
 //        testLayer.transform.postScale(3.0f, 3.0f);
-//        layer.transform.reset().setMatrix(testLayer.transform.requestMatrix());
+//        shapeLayer.transform.reset().setMatrix(testLayer.transform.requestMatrix());
 //        testLayer.contentsGravity = "resizeAspectFill";
-//        testLayer.mask = layer;
+        testLayer.mask = shapeLayer;
+        testLayer.masksToBounds = true;
 
-//        surfaceView.layer.backgroundColor = new CGColor(255,255,0);
+//        surfaceView.shapeLayer.backgroundColor = new CGColor(255,255,0);
         surfaceView.layer.addSublayer(testLayer);
+
+        displayLink = new CADisplayLink();
+        displayLink.setHandler(new CADisplayLinkDelegate() {
+            @Override
+            public void onDrawFrame() {
+                degree++;
+                if (degree > 100) {
+                    degree = 0;
+                }
+                Path path = new Path();
+                path.addCircle(150, 150, degree, Path.Direction.CCW);
+                shapeLayer.setPath(path);
+                shapeLayer.setNeedsDisplay();
+            }
+        });
 
 //
 //
@@ -90,18 +107,18 @@ public class MainActivity extends AppCompatActivity {
 ////
 ////        sLayer.removeFromSuperLayer();
 
-//        surfaceView.setNeedsDisplay();
+        surfaceView.setNeedsDisplay();
 
 
-        displayLink = new CADisplayLink();
-        displayLink.setHandler(new CADisplayLinkDelegate() {
-            @Override
-            public void onDrawFrame() {
-                degree++;
-                testLayer.transform.reset().postRotate(degree);
-                testLayer.setNeedsDisplay();
-            }
-        });
+//        displayLink = new CADisplayLink();
+//        displayLink.setHandler(new CADisplayLinkDelegate() {
+//            @Override
+//            public void onDrawFrame() {
+//                degree++;
+//                testLayer.transform.reset().postRotate(degree);
+//                testLayer.setNeedsDisplay();
+//            }
+//        });
 
         surfaceView.setBackgroundColor(Color.BLACK);
         FrameLayout frameLayout = new FrameLayout(this);

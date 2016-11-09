@@ -2,8 +2,10 @@ package com.yy.opensource.coreanimation;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PorterDuff;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -12,8 +14,6 @@ import javax.microedition.khronos.opengles.GL10;
  */
 
 public class CAShapeLayer extends CALayer {
-
-    public Path path;
 
     public CGColor fillColor = null;
 
@@ -27,24 +27,53 @@ public class CAShapeLayer extends CALayer {
 
     public String lineJoin;
 
-    public void setNeedsDisplay() {
-        this.contents = null;
+    protected Path path;
+
+    private boolean needsDisplay = true;
+
+    public Path getPath() {
+        return path;
     }
+
+    public void setPath(Path path) {
+        this.path = path;
+        needsDisplay = true;
+    }
+
+    private Bitmap sharedBitmap;
+    private Canvas sharedCanvas;
 
     @Override
     protected void drawContents(GL10 gl) {
-        if (this.contents == null && path != null) {
-            Bitmap bitmap = Bitmap.createBitmap((int)frame.width, (int)frame.height, Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(bitmap);
+        if (needsDisplay && path != null) {
+            Bitmap bitmap;
+            Canvas canvas;
+            Boolean reusing = false;
+            if (sharedBitmap != null && sharedBitmap.getWidth() == frame.width && sharedBitmap.getHeight() == frame.height) {
+                bitmap = sharedBitmap;
+                canvas = sharedCanvas;
+                reusing = true;
+            }
+            else {
+                bitmap = Bitmap.createBitmap((int)frame.width, (int)frame.height, Bitmap.Config.ARGB_8888);
+                canvas = new Canvas(bitmap);
+                sharedBitmap = bitmap;
+                sharedCanvas = canvas;
+            }
+            canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
             if (fillColor != null) {
                 canvas.drawPath(path, requestFillPaint());
             }
             if (lineWidth > 0) {
                 canvas.drawPath(path, requestLinePaint());
             }
-            this.contents = bitmap;
+            this.setContents(bitmap);
+            if (reusing) {
+                CALayerTexture.textureChanged.put(bitmap.toString(), true);
+            }
         }
         super.drawContents(gl);
+        needsDisplay = false;
     }
 
     static private Paint mPaint = new Paint();

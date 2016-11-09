@@ -8,6 +8,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,7 +20,8 @@ import javax.microedition.khronos.opengles.GL10;
 
 class CALayerTexture {
 
-    static private HashMap<Bitmap, CABitmapTextureEntity> textureCaches = new HashMap<>();
+    static private HashMap<String, CABitmapTextureEntity> textureCaches = new HashMap<>();
+    static protected HashMap<String, Boolean> textureChanged = new HashMap<>();
 
     static private FloatBuffer textureBuffer;
 
@@ -49,7 +51,7 @@ class CALayerTexture {
     }
 
     static protected void retainBitmap(Bitmap bitmap) {
-        CABitmapTextureEntity item = textureCaches.get(bitmap);
+        CABitmapTextureEntity item = textureCaches.get(bitmap.toString());
         if (item != null) {
             item.retain();
         }
@@ -57,12 +59,12 @@ class CALayerTexture {
             item = new CABitmapTextureEntity();
             item.bitmap = bitmap;
             item.retain();
-            textureCaches.put(bitmap, item);
+            textureCaches.put(bitmap.toString(), item);
         }
     }
 
     static protected void releaseBitmap(Bitmap bitmap) {
-        CABitmapTextureEntity item = textureCaches.get(bitmap);
+        CABitmapTextureEntity item = textureCaches.get(bitmap.toString());
         if (item != null) {
             item.release();
         }
@@ -71,13 +73,17 @@ class CALayerTexture {
     static void drawTextures(CALayer layer, GL10 gl) {
         init();
         if (layer.contents != null) {
-            CABitmapTextureEntity item = textureCaches.get(layer.contents);
+            CABitmapTextureEntity item = textureCaches.get(layer.contents.toString());
             if (item == null) {
                 item = new CABitmapTextureEntity();
                 item.bitmap = layer.contents;
-                textureCaches.put(layer.contents, item);
+                textureCaches.put(layer.contents.toString(), item);
             }
             item.loadTexture(gl);
+            if (textureChanged.get(item.bitmap.toString()) != null && textureChanged.get(item.bitmap.toString()) == true) {
+                item.updateTexture(gl);
+                textureChanged.remove(item.bitmap.toString());
+            }
             if (!item.loaded) {
                 return;
             }
@@ -121,8 +127,8 @@ class CALayerTexture {
     static private void gc(GL10 gl) {
         int rand =(int)(Math.random() * 11);
         if (rand == 0) {
-            HashMap<Bitmap, CABitmapTextureEntity> oldValues = new HashMap<>(textureCaches);
-            for (Map.Entry<Bitmap, CABitmapTextureEntity> entry : oldValues.entrySet()) {
+            HashMap<String, CABitmapTextureEntity> oldValues = new HashMap<>(textureCaches);
+            for (Map.Entry<String, CABitmapTextureEntity> entry : oldValues.entrySet()) {
                 if (entry.getValue().retainCount <= 0) {
                     entry.getValue().deleteTexture(gl);
                     textureCaches.remove(entry.getKey());
@@ -140,6 +146,7 @@ class CABitmapTextureEntity {
     protected boolean loaded = false;
     protected int retainCount = 0;
 
+
     protected void loadTexture(GL10 gl) {
         if (loaded) {
             return;
@@ -152,6 +159,13 @@ class CABitmapTextureEntity {
             GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, bitmap, 0);
             loaded = true;
         }
+    }
+
+    protected void updateTexture(GL10 gl) {
+        gl.glBindTexture(GL10.GL_TEXTURE_2D, textureID[0]);
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_LINEAR);
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR);
+        GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, bitmap, 0);
     }
 
     protected void deleteTexture(GL10 gl) {
