@@ -41,6 +41,7 @@ class CALayerMask {
             if (target.mask != null) {
                 target.mask.surfaceView = target.surfaceView;
                 target.mask.windowBounds = target.windowBounds;
+                target.mask.anchorPoint = target.anchorPoint;
                 target.mask.transform = CALayerHelper.combineTransform(target);
                 target.mask.drawContents(gl);
             }
