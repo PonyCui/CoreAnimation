@@ -137,6 +137,7 @@ class CALayerTexture {
                     newValues.put(entry.getKey(), entry.getValue());
                 }
             }
+            textureCaches = newValues;
         }
     }
 

@@ -18,16 +18,8 @@ class CALayerMask {
     };
 
     static void drawMask(CALayer layer, GL10 gl) {
-        boolean enabled = false;
-        gl.glEnable(GL10.GL_STENCIL_TEST);
-        gl.glEnableClientState(GL10.GL_COLOR_ARRAY);
-        gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
-        gl.glClearStencil(0);
-        gl.glColorMask(false, false, false, false);
-        gl.glDepthMask(false);
         CALayer current = layer;
         CALayer target = null;
-        gl.glColorPointer(4, GL10.GL_FLOAT, 0, CGColor.whiteColor.colorBuffer);
         while (current != null) {
             if (current.masksToBounds) {
                 target = current;
@@ -35,7 +27,13 @@ class CALayerMask {
             current = current.superLayer;
         }
         if (target != null) {
-            enabled = true;
+            gl.glEnable(GL10.GL_STENCIL_TEST);
+            gl.glEnableClientState(GL10.GL_COLOR_ARRAY);
+            gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
+            gl.glClearStencil(0);
+            gl.glColorMask(false, false, false, false);
+            gl.glDepthMask(false);
+            gl.glColorPointer(4, GL10.GL_FLOAT, 0, CGColor.whiteColor.colorBuffer);
             FloatBuffer vertexBuffer = CALayerHelper.requestVertexBuffer(CALayerHelper.combineTransform(target), target.anchorPoint, target.frame, target.windowBounds);
             gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
             gl.glStencilFunc(GL10.GL_ALWAYS, 1, 1);
@@ -49,14 +47,15 @@ class CALayerMask {
             else {
                 gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, vertices.length / 3);
             }
+            gl.glDisableClientState(GL10.GL_COLOR_ARRAY);
+            gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
+            gl.glColorMask(true, true, true, true);
+            gl.glDepthMask(true);
+            gl.glStencilFunc(GL10.GL_EQUAL, 1, 1);
+            gl.glStencilOp(GL10.GL_KEEP, GL10.GL_KEEP, GL10.GL_KEEP);
         }
-        gl.glDisableClientState(GL10.GL_COLOR_ARRAY);
-        gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
-        gl.glColorMask(true, true, true, true);
-        gl.glDepthMask(true);
-        gl.glStencilFunc(GL10.GL_EQUAL, 1, 1);
-        gl.glStencilOp(GL10.GL_KEEP, GL10.GL_KEEP, GL10.GL_KEEP);
-        if (!enabled) {
+        else {
+            gl.glClearStencil(0);
             gl.glDisable(GL10.GL_STENCIL_TEST);
         }
     }
