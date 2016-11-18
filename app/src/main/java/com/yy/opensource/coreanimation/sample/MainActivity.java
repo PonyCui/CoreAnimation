@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextPaint;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 
@@ -22,6 +23,7 @@ import com.yy.opensource.coreanimation.CADisplayLinkDelegate;
 import com.yy.opensource.coreanimation.CALayer;
 import com.yy.opensource.coreanimation.CAShapeLayer;
 import com.yy.opensource.coreanimation.CASurfaceView;
+import com.yy.opensource.coreanimation.CATextLayer;
 import com.yy.opensource.coreanimation.CATransform3D;
 import com.yy.opensource.coreanimation.CGColor;
 import com.yy.opensource.coreanimation.CGPoint;
@@ -41,6 +43,18 @@ public class MainActivity extends AppCompatActivity {
         final CASurfaceView surfaceView = new CASurfaceView(this);
         surfaceView.disableAutoRefresh();
         surfaceView.setZOrderOnTop(true);
+
+
+        CATextLayer textLayer = new CATextLayer();
+        textLayer.frame = new CGRect(300,300,200,100);
+        textLayer.setText("CATextLayer");
+        TextPaint textPaint = new TextPaint();
+        textPaint.setColor(0xffffffff);
+        textPaint.setTextSize(34);
+        textLayer.setPaint(textPaint);
+
+        surfaceView.layer.addSublayer(textLayer);
+        surfaceView.setNeedsDisplay();
 
         final CAShapeLayer shapeLayer = new CAShapeLayer();
         shapeLayer.frame = new CGRect(0,0,250,350);

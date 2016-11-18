@@ -45,6 +45,9 @@ public class CAShapeLayer extends CALayer {
 
     @Override
     protected void drawContents(GL10 gl) {
+        if (frame.width <= 0 || frame.height <= 0) {
+            return;
+        }
         if (needsDisplay && path != null) {
             Bitmap bitmap;
             Canvas canvas;
