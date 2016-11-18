@@ -238,7 +238,6 @@ public class CALayer {
             CALayer layer = subLayers[i];
             layer.surfaceView = surfaceView;
             layer.windowBounds = windowBounds;
-            layer.anchorPoint = anchorPoint;
             layer.draw(gl);
         }
     }
