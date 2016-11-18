@@ -44,6 +44,14 @@ public class MainActivity extends AppCompatActivity {
         surfaceView.disableAutoRefresh();
         surfaceView.setZOrderOnTop(true);
 
+        CALayer roundLayer = new CALayer();
+        roundLayer.cornerRadius = 44.0f;
+        roundLayer.borderWidth = 2;
+        roundLayer.borderColor = new CGColor(255,255,0);
+        roundLayer.frame = new CGRect(300, 100, 88, 88);
+        roundLayer.backgroundColor = new CGColor(255,255,255);
+        roundLayer.masksToBounds = true;
+        surfaceView.layer.addSublayer(roundLayer);
 
         CATextLayer textLayer = new CATextLayer();
         textLayer.frame = new CGRect(300,300,200,100);
@@ -52,9 +60,7 @@ public class MainActivity extends AppCompatActivity {
         textPaint.setColor(0xffffffff);
         textPaint.setTextSize(34);
         textLayer.setPaint(textPaint);
-
         surfaceView.layer.addSublayer(textLayer);
-        surfaceView.setNeedsDisplay();
 
         final CAShapeLayer shapeLayer = new CAShapeLayer();
         shapeLayer.frame = new CGRect(0,0,250,350);
@@ -63,22 +69,14 @@ public class MainActivity extends AppCompatActivity {
         shapeLayer.setPath(path);
         shapeLayer.fillColor = new CGColor(255,255,255);
 
-//        surfaceView.shapeLayer.addSublayer(shapeLayer);
-
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.test_alpha_half);
         final CALayer testLayer = new CALayer();
         testLayer.setContents(bitmap);
-//        testLayer.backgroundColor = new CGColor(0.5f, 0.5f, 0.5f);
         testLayer.opacity = 1.0f;
         testLayer.frame = new CGRect(0,0,250,350);
-//        testLayer.masksToBounds = true;
-//        testLayer.transform.postScale(3.0f, 3.0f);
-//        shapeLayer.transform.reset().setMatrix(testLayer.transform.requestMatrix());
-//        testLayer.contentsGravity = "resizeAspectFill";
         testLayer.mask = shapeLayer;
         testLayer.masksToBounds = true;
 
-//        surfaceView.shapeLayer.backgroundColor = new CGColor(255,255,0);
         surfaceView.layer.addSublayer(testLayer);
 
         displayLink = new CADisplayLink();
@@ -96,43 +94,19 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-//
-//
-////        Bitmap maskBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.masktest);
-////        Bitmap maskBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.test_square_mask);
-//        Bitmap maskBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.test_star_mask);
-//        CALayer maskLayer = new CALayer();
-//        maskLayer.frame = new CGRect(0,0,150,250);
-//        maskLayer.setContents(maskBitmap);
-//        testLayer.mask = maskLayer;
-//
-//        CALayer sLayer = new CALayer();
-//        sLayer.frame = new CGRect(150, 250, 150, 250);
-//        sLayer.backgroundColor = new CGColor(0.5f, 0.5f, 0.5f);
-//        sLayer.masksToBounds = false;
-////        sLayer.setContents(bitmap);
-//        testLayer.addSublayer(sLayer);
-////
-////        CALayer ssLayer = new CALayer();
-////        ssLayer.frame = new CGRect(150, 250, 150, 250);
-////        ssLayer.backgroundColor = new CGColor(0.5f, 0.5f, 0.5f);
-////        ssLayer.setContents(bitmap);
-////        sLayer.addSublayer(ssLayer);
-////
-////        sLayer.removeFromSuperLayer();
+        Bitmap maskBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.test_star_mask);
+        CALayer maskLayer = new CALayer();
+        maskLayer.frame = new CGRect(0,0,150,250);
+        maskLayer.setContents(maskBitmap);
+        testLayer.mask = maskLayer;
+
+        CALayer sLayer = new CALayer();
+        sLayer.frame = new CGRect(150, 250, 150, 250);
+        sLayer.backgroundColor = new CGColor(0.5f, 0.5f, 0.5f);
+        sLayer.masksToBounds = false;
+        testLayer.addSublayer(sLayer);
 
         surfaceView.setNeedsDisplay();
-
-
-//        displayLink = new CADisplayLink();
-//        displayLink.setHandler(new CADisplayLinkDelegate() {
-//            @Override
-//            public void onDrawFrame() {
-//                degree++;
-//                testLayer.transform.reset().postRotate(degree);
-//                testLayer.setNeedsDisplay();
-//            }
-//        });
 
         surfaceView.setBackgroundColor(Color.BLACK);
         FrameLayout frameLayout = new FrameLayout(this);

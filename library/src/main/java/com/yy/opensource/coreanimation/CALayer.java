@@ -246,4 +246,12 @@ public class CALayer {
         CALayerTexture.drawTextures(this, gl);
     }
 
+    /** Private Props, Stores rendered values. */
+
+    protected float oldCornerRadius = cornerRadius;
+
+    protected float oldBorderWidth = borderWidth;
+
+    protected CGColor oldBorderColor = borderColor;
+
 }
